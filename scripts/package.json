@@ -1,0 +1,20 @@
+{
+  "name": "medevidence-demo-video-scripts",
+  "version": "1.0.0",
+  "description": "Scripts for automated demo video creation",
+  "scripts": {
+    "create-video": "node create-demo-video.js",
+    "install-deps": "npm install puppeteer puppeteer-screen-recorder"
+  },
+  "dependencies": {
+    "puppeteer": "^21.0.0",
+    "puppeteer-screen-recorder": "^2.1.0"
+  },
+  "devDependencies": {}
+}
+
+
+
+
+
+
