@@ -53,4 +53,3 @@ sentry-sdk[fastapi]==1.38.0
 # Translation & Language Detection
 langdetect==1.0.9
 googletrans==4.0.2
-
