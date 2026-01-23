@@ -14,15 +14,10 @@ anthropic==0.7.0
 # Vector Database
 pinecone-client>=3.0.0
 
-# Embeddings
-# Removed sentence-transformers as we use Pinecone Inference API
-# sentence-transformers==2.2.2
-
 # Data processing
 requests==2.31.0
 beautifulsoup4==4.12.2
-lxml==4.9.3
-# Removed pandas - not used in backend code
+# Removed lxml - not directly used, beautifulsoup4 will use html.parser instead
 
 # Database
 sqlalchemy==2.0.23
@@ -49,6 +44,3 @@ sentry-sdk[fastapi]==1.38.0
 
 # Translation & Language Detection
 langdetect==1.0.9
-# Removed googletrans - it has installation issues
-# If you need translation, use deep-translator instead:
-# deep-translator==1.11.4
