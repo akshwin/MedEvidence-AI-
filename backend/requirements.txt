@@ -50,3 +50,5 @@ sentry-sdk[fastapi]==1.38.0
 # Translation & Language Detection
 langdetect==1.0.9
 # Removed googletrans - it has installation issues
+# If you need translation, use deep-translator instead:
+# deep-translator==1.11.4
