@@ -15,7 +15,8 @@ anthropic==0.7.0
 pinecone-client>=3.0.0
 
 # Embeddings
-sentence-transformers==2.2.2
+# Removed sentence-transformers as we use Pinecone Inference API
+# sentence-transformers==2.2.2
 
 # Data processing
 requests==2.31.0
@@ -49,5 +50,3 @@ sentry-sdk[fastapi]==1.38.0
 # Translation & Language Detection
 langdetect==1.0.9
 # Removed googletrans - it has installation issues
-# If you need translation, use deep-translator instead:
-# deep-translator==1.11.4
