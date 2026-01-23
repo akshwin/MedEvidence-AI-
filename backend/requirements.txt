@@ -1,9 +1,9 @@
-# FastAPI and server
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-python-multipart==0.0.6
+# FastAPI and server - Upgraded for Pydantic v2 support
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+python-multipart>=0.0.9
 
-# LLM and RAG - Unpinned to resolve dependency conflicts
+# LLM and RAG
 langchain
 langchain-openai
 langchain-anthropic
@@ -12,9 +12,7 @@ openai
 anthropic
 
 # Vector Database
-# START FIX: Renamed from pinecone-client to pinecone
 pinecone>=3.0.0
-# END FIX
 
 # Data processing
 requests
