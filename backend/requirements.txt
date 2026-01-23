@@ -12,7 +12,9 @@ openai
 anthropic
 
 # Vector Database
-pinecone-client>=3.0.0
+# START FIX: Renamed from pinecone-client to pinecone
+pinecone>=3.0.0
+# END FIX
 
 # Data processing
 requests
