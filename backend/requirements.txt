@@ -9,7 +9,9 @@ langchain-openai==0.0.2
 langchain-anthropic==0.1.0
 langchain-groq==0.1.0
 openai>=1.6.1,<2.0.0
-anthropic==0.7.0
+# Removed pinned anthropic version to avoid conflict with langchain-anthropic
+# Pip will automatically install the compatible version
+# anthropic==0.7.0
 
 # Vector Database
 pinecone-client>=3.0.0
@@ -18,6 +20,7 @@ pinecone-client>=3.0.0
 requests==2.31.0
 beautifulsoup4==4.12.2
 # Removed lxml - not directly used, beautifulsoup4 will use html.parser instead
+# Removed pandas - not used in backend code
 
 # Database
 sqlalchemy==2.0.23
