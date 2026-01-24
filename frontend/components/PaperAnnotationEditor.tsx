@@ -35,7 +35,7 @@ export default function PaperAnnotationEditor({ paper, annotations, onAnnotation
   const { showToast } = useToast()
   const [selectedText, setSelectedText] = useState('')
   const [selectedColor, setSelectedColor] = useState('yellow')
-  const [annotationNote, setAnnotationNote] = useState('')
+
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [editingAnnotation, setEditingAnnotation] = useState<PaperAnnotation | null>(null)
   const abstractRef = useRef<HTMLDivElement>(null)
@@ -128,12 +128,12 @@ export default function PaperAnnotationEditor({ paper, annotations, onAnnotation
         selected_text: selectedText,
         start_offset: offsets.startOffset,
         end_offset: offsets.endOffset,
-        content: annotationNote || undefined,
+        // content: undefined, // Note field removed
         color: selectedColor,
       })
       showToast('Annotation created', 'success')
       setSelectedText('')
-      setAnnotationNote('')
+
       onAnnotationsChange()
     } catch (error: any) {
       console.error('Error creating annotation:', error)
@@ -201,13 +201,7 @@ export default function PaperAnnotationEditor({ paper, annotations, onAnnotation
             </div>
           </div>
 
-          <textarea
-            value={annotationNote}
-            onChange={(e) => setAnnotationNote(e.target.value)}
-            placeholder="Add a note (optional)..."
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm mb-3"
-            rows={2}
-          />
+
 
           <button
             onClick={handleCreateAnnotation}
@@ -223,7 +217,7 @@ export default function PaperAnnotationEditor({ paper, annotations, onAnnotation
       {!selectedText && (
         <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
           <p className="text-sm text-blue-900 dark:text-blue-200">
-            Select text in the abstract below to create a highlight. You can add notes to your highlights.
+            Select text in the abstract below to create a highlight.
           </p>
         </div>
       )}
