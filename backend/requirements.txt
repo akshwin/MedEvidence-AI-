@@ -9,7 +9,7 @@ langchain-openai
 langchain-anthropic
 langchain-groq
 openai
-anthropic
+anthropic>=0.16.0,<1.0.0
 
 # Vector Database
 pinecone>=3.0.0

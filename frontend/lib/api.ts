@@ -188,7 +188,7 @@ export const authApi = {
   },
 
   register: async (email: string, password: string, fullName?: string): Promise<{ message: string; user_id: string; verification_url?: string }> => {
-    const response = await api.post<{ message: string; user_id: string }>('/api/auth/register', {
+    const response = await api.post<{ message: string; user_id: string; verification_url?: string }>('/api/auth/register', {
       email,
       password,
       full_name: fullName,
