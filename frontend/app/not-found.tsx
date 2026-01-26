@@ -48,6 +48,7 @@ export default function NotFound() {
             <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Pricing</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">View our plans and features</p>
           </Link>
+
           <Link href="/contact" className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-500 transition-colors">
             <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Contact</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">Get help and support</p>

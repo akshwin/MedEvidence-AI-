@@ -31,12 +31,12 @@ export default function ContactPage() {
         subject: formData.subject || 'General Inquiry',
         message: formData.message,
       })
-      
+
       setIsSubmitting(false)
       setIsSubmitted(true)
       success(response.message || 'Thank you! Your message has been sent successfully.')
       setFormData({ name: '', email: '', subject: '', message: '' })
-      
+
       setTimeout(() => {
         setIsSubmitted(false)
       }, 5000)
@@ -184,6 +184,7 @@ export default function ContactPage() {
                     <option value="general">General Inquiry</option>
                     <option value="support">Technical Support</option>
                     <option value="sales">Sales & Pricing</option>
+
                     <option value="partnership">Partnership</option>
                     <option value="other">Other</option>
                   </select>

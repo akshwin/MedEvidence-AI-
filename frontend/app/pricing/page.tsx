@@ -147,11 +147,10 @@ export default function PricingPage() {
           {plans.map((plan, index) => (
             <div
               key={index}
-              className={`relative bg-white dark:bg-gray-800 rounded-3xl shadow-xl border-2 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl ${
-                plan.popular
+              className={`relative bg-white dark:bg-gray-800 rounded-3xl shadow-xl border-2 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl ${plan.popular
                   ? 'border-emerald-500 dark:border-emerald-500 scale-105'
                   : 'border-gray-200 dark:border-gray-700'
-              }`}
+                }`}
             >
               {/* Popular Badge */}
               {plan.popular && (
@@ -197,11 +196,10 @@ export default function PricingPage() {
                 {/* CTA Button */}
                 <Link
                   href={plan.buttonLink}
-                  className={`block w-full py-4 px-6 rounded-xl font-semibold text-center transition-all duration-300 ${
-                    plan.popular
+                  className={`block w-full py-4 px-6 rounded-xl font-semibold text-center transition-all duration-300 ${plan.popular
                       ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 transform hover:-translate-y-0.5'
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 border-2 border-gray-200 dark:border-gray-600'
-                  }`}
+                    }`}
                 >
                   {plan.buttonText}
                 </Link>
@@ -320,4 +318,3 @@ export default function PricingPage() {
     </div>
   )
 }
-

@@ -346,6 +346,7 @@ export default function Home() {
               <Link href="/pricing" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors font-medium text-sm">
                 Pricing
               </Link>
+
               {isAuthenticated ? (
                 <>
                   <Link href="/research" className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl hover:from-emerald-700 hover:to-teal-700 transition-all font-medium text-sm shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30 transform hover:-translate-y-0.5 inline-flex items-center space-x-1.5">
@@ -494,7 +495,7 @@ export default function Home() {
 
         <div className="max-w-4xl mx-auto">
           {/* Video Player */}
-          <DemoVideo 
+          <DemoVideo
             videoType="direct"
             videoUrl="/videos/demo-video.mp4"
           />
@@ -667,7 +668,6 @@ export default function Home() {
                 </li>
               </ul>
             </div>
-
             {/* Pricing Section */}
             <div>
               <h4 className="font-bold text-white mb-4 text-sm">Pricing</h4>

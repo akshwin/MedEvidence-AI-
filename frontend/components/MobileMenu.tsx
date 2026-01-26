@@ -115,6 +115,7 @@ export default function MobileMenu({ onNavigate }: MobileMenuProps) {
                     <span className="font-medium">Pricing</span>
                     <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </Link>
+
                   <Link
                     href="/research"
                     onClick={handleLinkClick}
