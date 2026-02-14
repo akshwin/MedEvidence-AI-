@@ -32,17 +32,17 @@ async def send_contact_email(request: ContactRequest):
     try:
         from app.core.config import settings
         
-        recipient_email = "akshwint.2003@gmail.com"
         smtp_server = settings.smtp_server or "smtp.gmail.com"
         smtp_port = settings.smtp_port or 587
-        smtp_username = settings.smtp_username or "akshwint.2003@gmail.com"
+        smtp_username = settings.smtp_username
         smtp_password = settings.smtp_password
+        recipient_email = settings.contact_recipient_email or smtp_username
         
         # Check if SMTP password is configured
-        if not smtp_password:
+        if not smtp_username or not smtp_password or not recipient_email:
             raise HTTPException(
                 status_code=500,
-                detail="Email service not configured. Please add SMTP_PASSWORD to backend/.env file. See backend/QUICK_EMAIL_SETUP.md for instructions."
+                detail="Email service not configured. Please set SMTP_USERNAME and SMTP_PASSWORD (and optionally CONTACT_RECIPIENT_EMAIL) in backend/.env. See backend/QUICK_EMAIL_SETUP.md for instructions."
             )
         
         # Create email

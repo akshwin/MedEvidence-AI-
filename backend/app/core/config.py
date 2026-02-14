@@ -36,6 +36,7 @@ class Settings(BaseSettings):
     smtp_port: int = 587
     smtp_username: Optional[str] = None
     smtp_password: Optional[str] = None  # Gmail App Password
+    contact_recipient_email: Optional[str] = None  # Defaults to smtp_username if not set
     
     # LLM Settings
     llm_model: str = "llama-3.1-8b-instant"  # Groq model

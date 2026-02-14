@@ -23,9 +23,10 @@ def setup_email():
     print("5. Copy the 16-character password (it looks like: abcd efgh ijkl mnop)")
     print()
     
+    smtp_username = input("Enter the Gmail address you want to send from (SMTP_USERNAME): ").strip()
     app_password = input("Enter your Gmail App Password (or press Enter to skip): ").strip()
     
-    if not app_password:
+    if not smtp_username or not app_password:
         print("\n[WARNING] Skipping email setup. Contact form will log messages but won't send emails.")
         print("   You can set this up later by editing backend/.env")
         return
@@ -40,7 +41,7 @@ def setup_email():
     email_settings = {
         'SMTP_SERVER': 'smtp.gmail.com',
         'SMTP_PORT': '587',
-        'SMTP_USERNAME': 'akshwint.2003@gmail.com',
+        'SMTP_USERNAME': smtp_username,
         'SMTP_PASSWORD': app_password
     }
     
@@ -63,7 +64,6 @@ def setup_email():
     print("      cd backend")
     print("      uvicorn app.main:app --reload")
     print("   2. Test the contact form on your website")
-    print("   3. Check your email inbox (akshwint.2003@gmail.com)")
     print()
 
 if __name__ == "__main__":
