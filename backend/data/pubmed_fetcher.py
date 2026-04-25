@@ -252,12 +252,14 @@ class PubMedFetcher:
             
             # 1. Search for IDs
             search_url = f"{self.BASE_URL}/esearch.fcgi"
-            # Reduce retmax for analysis endpoints (faster, less data to process)
-            retmax = max_results if max_results <= 10 else max_results * 2
+            # Ask PubMed for more PMIDs than we return, so we can re-rank and drop weak matches.
+            # (Previously we requested a larger retmax but trimmed IDs to max_results before efetch, which
+            # defeated that strategy.) Cap keeps latency and URL sizes reasonable.
+            _scoring_pool = min(max(max_results * 4, 20), 100)
             search_params = {
                 "db": "pubmed",
                 "term": processed_query,
-                "retmax": retmax,
+                "retmax": _scoring_pool,
                 "usehistory": "y",
                 "email": self.email,
                 "retmode": "json"
@@ -280,8 +282,8 @@ class PubMedFetcher:
             if not id_list:
                 return []
             
-            # Limit to max_results to avoid URL length issues
-            id_list = id_list[:max_results]
+            # Use the full pool we asked for; trimming to max_results happens *after* scoring
+            id_list = id_list[:_scoring_pool]
             
             # 2. Fetch details for IDs in batches (to avoid URL length limit)
             # PubMed API has a limit, so we'll batch requests
@@ -437,6 +439,16 @@ class PubMedFetcher:
             print(f"Error fetching from PubMed: {e}")
             return []
     
+    @staticmethod
+    def _word_match_count(text: str, term: str) -> int:
+        """Count whole-word matches; avoids substring noise (e.g. 'cell' in 'cellular')."""
+        import re
+        if not text or not term:
+            return 0
+        if len(term) <= 2:
+            return 1 if re.search(rf"\b{re.escape(term)}\b", text, re.IGNORECASE) else 0
+        return len(re.findall(rf"\b{re.escape(term)}\b", text, re.IGNORECASE))
+    
     def _score_and_rank_papers(self, papers: List[Dict], query: str, age_keywords: List[str]) -> List[Dict]:
         """
         Score papers based on relevance to query and re-rank them
@@ -454,6 +466,8 @@ class PubMedFetcher:
         # Extract key terms from query (excluding common words)
         stop_words = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'should', 'could', 'may', 'might', 'must', 'can', 'what', 'which', 'who', 'when', 'where', 'why', 'how'}
         query_terms = set(re.findall(r'\b\w+\b', query.lower())) - stop_words
+        # Ultra-short tokens (e.g. 'ra', 'p') are noisy; require length >= 3 for scoring
+        query_terms = {t for t in query_terms if len(t) >= 3}
         
         scored_papers = []
         
@@ -463,12 +477,18 @@ class PubMedFetcher:
             abstract = paper.get('abstract', '').lower()
             full_text = f"{title} {abstract}"
             
+            if not query_terms:
+                # Nothing to match on (e.g. all stop words); do not re-rank
+                paper['relevance_score'] = 0.5
+                scored_papers.append(paper)
+                continue
+            
             # Score based on title matches (higher weight)
-            title_matches = sum(1 for term in query_terms if term in title)
+            title_matches = sum(self._word_match_count(title, term) for term in query_terms)
             score += title_matches * 3.0  # Title matches are very important
             
             # Score based on abstract matches
-            abstract_matches = sum(1 for term in query_terms if term in abstract)
+            abstract_matches = sum(self._word_match_count(abstract, term) for term in query_terms)
             score += abstract_matches * 1.0
             
             # Bonus for age-related keywords if present in query
@@ -498,11 +518,24 @@ class PubMedFetcher:
         # Sort by relevance score (highest first)
         scored_papers.sort(key=lambda x: x.get('relevance_score', 0), reverse=True)
         
-        # Filter out papers with very low relevance (< 0.1) if we have enough results
-        if len(scored_papers) > 5:
-            scored_papers = [p for p in scored_papers if p.get('relevance_score', 0) >= 0.1]
+        # Drop stragglers: fixed floor + relative to best result (PubMed can return loosely related articles)
+        if len(scored_papers) > 0:
+            best = scored_papers[0].get('relevance_score', 0)
+            if best <= 0:
+                pass
+            else:
+                floor = max(0.14, 0.42 * best)
+                if len(scored_papers) >= 3:
+                    new_list = [p for p in scored_papers if p.get('relevance_score', 0) >= floor]
+                    if new_list:
+                        scored_papers = new_list
+                elif len(scored_papers) == 2:
+                    p1, p2 = scored_papers[0].get('relevance_score', 0), scored_papers[1].get('relevance_score', 0)
+                    if p1 > 0 and p2 < max(0.12, 0.35 * p1):
+                        scored_papers = scored_papers[:1]
         
-        print(f"Re-ranked {len(scored_papers)} papers by relevance (top score: {scored_papers[0].get('relevance_score', 0):.2f})")
+        top = scored_papers[0].get('relevance_score', 0) if scored_papers else 0.0
+        print(f"Re-ranked {len(scored_papers)} papers by relevance (top score: {top:.2f})")
         
         return scored_papers
     

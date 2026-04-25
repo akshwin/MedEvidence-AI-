@@ -7,18 +7,18 @@ Copy and paste these values into Render's Environment Variables section:
 --------------------------------------------------------------------------------
 REQUIRED - LLM API KEY
 --------------------------------------------------------------------------------
-GROQ_API_KEY=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
+GROQ_API_KEY=your_groq_api_key_here
 
 --------------------------------------------------------------------------------
 REQUIRED - VECTOR DATABASE
 --------------------------------------------------------------------------------
-PINECONE_API_KEY=pcsk_23JKqD_7LLeuoKGeYQ1cKdeAx5WA22yAZnHevUAuwyzAe3pHrWhH9xVgEeFkYQHMVJdW1h
+PINECONE_API_KEY=your_pinecone_api_key_here
 PINECONE_ENVIRONMENT=us-east-1
 
 --------------------------------------------------------------------------------
 REQUIRED - SECURITY (Random Secret Key Generated)
 --------------------------------------------------------------------------------
-SECRET_KEY=MedEvidence2024_SecureKey_K6xBNADGAlBazBexgYYvWGdyb3FYNfNOlTbDqH66bKVhL5CKph6O_Production
+SECRET_KEY=generate_a_long_random_string
 
 --------------------------------------------------------------------------------
 REQUIRED - FRONTEND URL (Update after deploying frontend)
@@ -50,22 +50,22 @@ OPTIONAL - EMAIL SETTINGS (For Contact Form)
 --------------------------------------------------------------------------------
 SMTP_SERVER=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USERNAME=akshwint.2003@gmail.com
-SMTP_PASSWORD=libl ckgt evvc yiaf
+SMTP_USERNAME=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
 
 --------------------------------------------------------------------------------
 OPTIONAL - PUBMED EMAIL
 --------------------------------------------------------------------------------
-PUBMED_EMAIL=akshwint.2003@gmail.com
+PUBMED_EMAIL=your-email@gmail.com
 
 ================================================================================
 COPY-PASTE FORMAT (One variable per line for Render)
 ================================================================================
 
-GROQ_API_KEY=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
-PINECONE_API_KEY=pcsk_23JKqD_7LLeuoKGeYQ1cKdeAx5WA22yAZnHevUAuwyzAe3pHrWhH9xVgEeFkYQHMVJdW1h
+GROQ_API_KEY=your_groq_api_key_here
+PINECONE_API_KEY=your_pinecone_api_key_here
 PINECONE_ENVIRONMENT=us-east-1
-SECRET_KEY=MedEvidence2024_SecureKey_K6xBNADGAlBazBexgYYvWGdyb3FYNfNOlTbDqH66bKVhL5CKph6O_Production
+SECRET_KEY=generate_a_long_random_string
 FRONTEND_URL=https://temporary-placeholder.vercel.app
 DATABASE_URL=sqlite:///./researchgpt.db
 DEBUG=False
@@ -73,9 +73,9 @@ API_HOST=0.0.0.0
 API_PORT=8000
 SMTP_SERVER=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USERNAME=akshwint.2003@gmail.com
-SMTP_PASSWORD=libl ckgt evvc yiaf
-PUBMED_EMAIL=akshwint.2003@gmail.com
+SMTP_USERNAME=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+PUBMED_EMAIL=your-email@gmail.com
 
 ================================================================================
 IMPORTANT NOTES
@@ -108,7 +108,7 @@ HOW TO ADD THESE IN RENDER
 3. For each variable:
    - Click "Add Environment Variable"
    - Enter the KEY (e.g., GROQ_API_KEY)
-   - Enter the VALUE (e.g., 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)
+   - Enter the VALUE (your actual secret value)
    - Click "Save"
 4. After adding all variables, click "Save Changes"
 5. Render will automatically redeploy your service
