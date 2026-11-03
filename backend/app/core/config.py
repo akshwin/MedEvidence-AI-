@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     contact_recipient_email: Optional[str] = None  # Defaults to smtp_username if not set
     
     # LLM Settings
-    llm_model: str = "llama-3.1-8b-instant"  # Groq model
+    llm_model: str = "openai/gpt-oss-120b"  # Groq model
     max_tokens: int = 2000
     temperature: float = 0.3
     
