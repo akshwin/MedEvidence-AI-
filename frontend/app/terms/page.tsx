@@ -19,7 +19,9 @@ export default function TermsPage() {
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-700 to-teal-700 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">
                   MedEvidence AI
                 </h1>
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Terms of Service</p>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                  Terms of Service
+                </p>
               </div>
             </Link>
             <div className="flex items-center space-x-4">
@@ -47,20 +49,35 @@ export default function TermsPage() {
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Terms of Service</h1>
           </div>
 
-          <p className="text-gray-600 dark:text-gray-400 mb-8">Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          <p className="text-gray-600 dark:text-gray-400 mb-8">
+            Last updated:{' '}
+            {new Date().toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </p>
 
           <div className="prose prose-emerald dark:prose-invert max-w-none space-y-8">
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">1. Acceptance of Terms</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                1. Acceptance of Terms
+              </h2>
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                By accessing and using MedEvidence AI, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these terms, please do not use our service.
+                By accessing and using MedEvidence AI, you accept and agree to be bound by the terms
+                and provision of this agreement. If you do not agree to these terms, please do not
+                use our service.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">2. Use License</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                2. Use License
+              </h2>
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-4">
-                Permission is granted to temporarily use MedEvidence AI for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:
+                Permission is granted to temporarily use MedEvidence AI for personal, non-commercial
+                transitory viewing only. This is the grant of a license, not a transfer of title,
+                and under this license you may not:
               </p>
               <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
                 <li>Modify or copy the materials</li>
@@ -71,14 +88,21 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">3. Medical Disclaimer</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                3. Medical Disclaimer
+              </h2>
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                <strong className="text-gray-900 dark:text-white">Important:</strong> MedEvidence AI is a research tool and does not provide medical advice, diagnosis, or treatment. The information provided is for research and educational purposes only. Always consult qualified healthcare professionals for medical advice.
+                <strong className="text-gray-900 dark:text-white">Important:</strong> MedEvidence AI
+                is a research tool and does not provide medical advice, diagnosis, or treatment. The
+                information provided is for research and educational purposes only. Always consult
+                qualified healthcare professionals for medical advice.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">4. User Accounts</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                4. User Accounts
+              </h2>
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-4">
                 When you create an account, you are responsible for:
               </p>
@@ -90,7 +114,9 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">5. Prohibited Uses</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                5. Prohibited Uses
+              </h2>
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-4">
                 You may not use our service:
               </p>
@@ -104,24 +130,37 @@ export default function TermsPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">6. Limitation of Liability</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                6. Limitation of Liability
+              </h2>
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                In no event shall MedEvidence AI or its suppliers be liable for any damages arising out of the use or inability to use the materials on our platform, even if we have been notified of the possibility of such damage.
+                In no event shall MedEvidence AI or its suppliers be liable for any damages arising
+                out of the use or inability to use the materials on our platform, even if we have
+                been notified of the possibility of such damage.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">7. Changes to Terms</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                7. Changes to Terms
+              </h2>
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                We reserve the right to revise these terms at any time without notice. By using this service, you are agreeing to be bound by the then current version of these Terms of Service.
+                We reserve the right to revise these terms at any time without notice. By using this
+                service, you are agreeing to be bound by the then current version of these Terms of
+                Service.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">8. Contact Information</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                8. Contact Information
+              </h2>
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                 If you have any questions about these Terms of Service, please contact us at{' '}
-                <a href="mailto:legal@medevidence.ai" className="text-emerald-600 dark:text-emerald-400 hover:underline">
+                <a
+                  href="mailto:legal@medevidence.ai"
+                  className="text-emerald-600 dark:text-emerald-400 hover:underline"
+                >
                   legal@medevidence.ai
                 </a>
               </p>
@@ -132,4 +171,3 @@ export default function TermsPage() {
     </div>
   )
 }
-

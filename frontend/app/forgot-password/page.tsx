@@ -40,7 +40,8 @@ export default function ForgotPasswordPage() {
             Check Your Email
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            If an account with <strong>{email}</strong> exists, we've sent a password reset link to your email address. Please check your inbox and follow the instructions.
+            If an account with <strong>{email}</strong> exists, we've sent a password reset link to
+            your email address. Please check your inbox and follow the instructions.
           </p>
           <Link
             href="/login"
@@ -81,7 +82,10 @@ export default function ForgotPasswordPage() {
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 Email address
               </label>
               <div className="relative">
@@ -130,9 +134,3 @@ export default function ForgotPasswordPage() {
     </div>
   )
 }
-
-
-
-
-
-

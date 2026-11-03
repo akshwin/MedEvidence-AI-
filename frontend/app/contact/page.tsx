@@ -42,12 +42,17 @@ export default function ContactPage() {
       }, 5000)
     } catch (error: any) {
       setIsSubmitting(false)
-      const errorMessage = error?.response?.data?.detail || error?.message || 'Failed to send message. Please try again or email us directly at akshwint.2003@gmail.com'
+      const errorMessage =
+        error?.response?.data?.detail ||
+        error?.message ||
+        'Failed to send message. Please try again or email us directly at akshwint.2003@gmail.com'
       error(errorMessage)
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -95,10 +100,14 @@ export default function ContactPage() {
             <span>Get in Touch</span>
           </div>
           <h1 className="text-5xl sm:text-6xl font-extrabold text-gray-900 dark:text-white mb-6">
-            Contact <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Us</span>
+            Contact{' '}
+            <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+              Us
+            </span>
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+            Have questions? We'd love to hear from you. Send us a message and we'll respond as soon
+            as possible.
           </p>
         </div>
 
@@ -110,7 +119,10 @@ export default function ContactPage() {
                 <Mail className="w-6 h-6 text-white" />
               </div>
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Email</h3>
-              <a href="mailto:akshwint.2003@gmail.com" className="text-emerald-600 dark:text-emerald-400 hover:underline">
+              <a
+                href="mailto:akshwint.2003@gmail.com"
+                className="text-emerald-600 dark:text-emerald-400 hover:underline"
+              >
                 akshwint.2003@gmail.com
               </a>
             </div>
@@ -119,8 +131,12 @@ export default function ContactPage() {
               <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex items-center justify-center mb-4">
                 <MessageSquare className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Response Time</h3>
-              <p className="text-gray-600 dark:text-gray-400">We typically respond within 24 hours</p>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                Response Time
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                We typically respond within 24 hours
+              </p>
             </div>
           </div>
 
@@ -131,13 +147,18 @@ export default function ContactPage() {
                 <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                   <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Message Sent!</h3>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  Message Sent!
+                </h3>
                 <p className="text-gray-600 dark:text-gray-400">We'll get back to you soon.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label
+                    htmlFor="name"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  >
                     Name
                   </label>
                   <input
@@ -153,7 +174,10 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  >
                     Email
                   </label>
                   <input
@@ -169,7 +193,10 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="subject" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label
+                    htmlFor="subject"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  >
                     Subject
                   </label>
                   <select
@@ -191,7 +218,10 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label
+                    htmlFor="message"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  >
                     Message
                   </label>
                   <textarea
@@ -231,4 +261,3 @@ export default function ContactPage() {
     </div>
   )
 }
-

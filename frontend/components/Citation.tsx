@@ -41,11 +41,16 @@ export default function CitationComponent({ citation }: CitationProps) {
                 <p className="text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-semibold">{formatAuthors(citation.authors)}</span>
                   {citation.year && (
-                    <span className="text-gray-500 dark:text-gray-400"> • {formatDate(citation.year)}</span>
+                    <span className="text-gray-500 dark:text-gray-400">
+                      {' '}
+                      • {formatDate(citation.year)}
+                    </span>
                   )}
                 </p>
                 {citation.journal && (
-                  <p className="text-xs text-gray-600 dark:text-gray-400 italic font-medium">{citation.journal}</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 italic font-medium">
+                    {citation.journal}
+                  </p>
                 )}
                 {citation.relevance_score && (
                   <div className="flex items-center space-x-3 mt-3">
@@ -66,13 +71,13 @@ export default function CitationComponent({ citation }: CitationProps) {
           </div>
         </div>
         <div className="ml-4 flex-shrink-0 flex flex-col items-end space-y-2">
-          <PaperActions 
+          <PaperActions
             paper={{
               pmid: citation.pmid,
               title: citation.title,
               authors: citation.authors,
               year: citation.year,
-              journal: citation.journal
+              journal: citation.journal,
             }}
           />
           <div className="flex space-x-2">

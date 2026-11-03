@@ -10,12 +10,21 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'MedEvidence AI | AI-powered clinical evidence, instantly',
-  description: 'Evidence-backed medical answers from PubMed. MedEvidence AI combines PubMed\'s 39 million citations with your institution\'s protocols to provide AI-powered clinical evidence, instantly.',
-  keywords: ['medical research', 'PubMed', 'clinical evidence', 'AI healthcare', 'medical literature', 'evidence-based medicine'],
+  description:
+    "Evidence-backed medical answers from PubMed. MedEvidence AI combines PubMed's 39 million citations with your institution's protocols to provide AI-powered clinical evidence, instantly.",
+  keywords: [
+    'medical research',
+    'PubMed',
+    'clinical evidence',
+    'AI healthcare',
+    'medical literature',
+    'evidence-based medicine',
+  ],
   authors: [{ name: 'MedEvidence AI' }],
   openGraph: {
     title: 'MedEvidence AI | AI-powered clinical evidence',
-    description: 'Evidence-backed medical answers from PubMed. Get instant, evidence-based answers with citations from peer-reviewed medical papers.',
+    description:
+      'Evidence-backed medical answers from PubMed. Get instant, evidence-based answers with citations from peer-reviewed medical papers.',
     type: 'website',
     locale: 'en_US',
   },
@@ -30,11 +39,7 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -44,9 +49,7 @@ export default function RootLayout({
         <ErrorBoundary>
           <ThemeProvider>
             <AuthProvider>
-              <ToastProvider>
-                {children}
-              </ToastProvider>
+              <ToastProvider>{children}</ToastProvider>
             </AuthProvider>
           </ThemeProvider>
         </ErrorBoundary>
@@ -54,4 +57,3 @@ export default function RootLayout({
     </html>
   )
 }
-

@@ -15,11 +15,17 @@ export default function ConversationsPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-6xl">
           {/* Breadcrumb */}
           <nav className="mb-6 flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-            <Link href="/" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
+            <Link
+              href="/"
+              className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+            >
               Home
             </Link>
             <span>/</span>
-            <Link href="/research" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
+            <Link
+              href="/research"
+              className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+            >
               Research
             </Link>
             <span>/</span>
@@ -31,4 +37,3 @@ export default function ConversationsPage() {
     </RequireAuth>
   )
 }
-

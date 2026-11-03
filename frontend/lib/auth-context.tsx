@@ -18,7 +18,11 @@ interface AuthContextType {
   token: string | null
   loading: boolean
   login: (email: string, password: string) => Promise<void>
-  register: (email: string, password: string, fullName?: string) => Promise<{ message: string; user_id: string; verification_url?: string }>
+  register: (
+    email: string,
+    password: string,
+    fullName?: string,
+  ) => Promise<{ message: string; user_id: string; verification_url?: string }>
   logout: () => void
   isAuthenticated: boolean
 }
@@ -35,7 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const storedToken = localStorage.getItem('auth_token')
     const storedUser = localStorage.getItem('auth_user')
-    
+
     if (storedToken && storedUser) {
       setToken(storedToken)
       setUser(JSON.parse(storedUser))
@@ -121,4 +125,3 @@ export function useAuth() {
   }
   return context
 }
-

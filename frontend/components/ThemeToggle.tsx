@@ -26,15 +26,3 @@ export default function ThemeToggle() {
     </button>
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-

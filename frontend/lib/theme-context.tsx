@@ -49,11 +49,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }
 
   // Always provide context, even during SSR
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  )
+  return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>
 }
 
 export function useTheme() {
@@ -63,4 +59,3 @@ export function useTheme() {
   }
   return context
 }
-

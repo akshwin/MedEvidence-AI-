@@ -11,14 +11,13 @@ export default function NotFound() {
           <div className="w-24 h-24 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-emerald-500/20">
             <FileQuestion className="w-12 h-12 text-white" />
           </div>
-          <h1 className="text-9xl font-extrabold text-gray-900 dark:text-white mb-4">
-            404
-          </h1>
+          <h1 className="text-9xl font-extrabold text-gray-900 dark:text-white mb-4">404</h1>
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Page Not Found
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
-            The page you're looking for doesn't exist or has been moved. Let's get you back on track.
+            The page you're looking for doesn't exist or has been moved. Let's get you back on
+            track.
           </p>
         </div>
 
@@ -40,16 +39,27 @@ export default function NotFound() {
         </div>
 
         <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
-          <Link href="/docs" className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-500 transition-colors">
+          <Link
+            href="/docs"
+            className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-500 transition-colors"
+          >
             <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Documentation</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Learn how to use MedEvidence AI</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Learn how to use MedEvidence AI
+            </p>
           </Link>
-          <Link href="/pricing" className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-500 transition-colors">
+          <Link
+            href="/pricing"
+            className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-500 transition-colors"
+          >
             <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Pricing</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">View our plans and features</p>
           </Link>
 
-          <Link href="/contact" className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-500 transition-colors">
+          <Link
+            href="/contact"
+            className="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-500 transition-colors"
+          >
             <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Contact</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">Get help and support</p>
           </Link>
@@ -58,10 +68,3 @@ export default function NotFound() {
     </div>
   )
 }
-
-
-
-
-
-
-

@@ -49,12 +49,8 @@ export default function LoginPage() {
               </h1>
             </div>
           </Link>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Welcome back
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            Sign in to your account to continue
-          </p>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Welcome back</h2>
+          <p className="text-gray-600 dark:text-gray-400">Sign in to your account to continue</p>
         </div>
 
         {/* Login Form */}
@@ -67,7 +63,10 @@ export default function LoginPage() {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 Email address
               </label>
               <div className="relative">
@@ -85,7 +84,10 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 Password
               </label>
               <div className="relative">
@@ -172,4 +174,3 @@ export default function LoginPage() {
     </div>
   )
 }
-

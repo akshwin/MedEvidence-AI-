@@ -1,92 +1,78 @@
-# 🏥 MedEvidence AI
+# MedEvidence AI
 
-**Evidence-backed medical answers from PubMed**
+Evidence-backed medical answers from PubMed. A question is turned into a PubMed search, the matching abstracts are ranked, and an LLM (via Groq) writes an answer that cites only those papers.
 
-**AI-powered clinical evidence, instantly**
+## Project structure
 
-MedEvidence AI combines PubMed's 39 million citations with your institution's protocols, guidelines, and research to provide instant, evidence-based answers customized to your clinical practice.
+```
+backend/                 FastAPI API (deployed on Render)
+  app/
+    api/routes/          HTTP endpoints (auth, query, search, dashboard, ...)
+    core/                config, security, RAG pipeline
+    middleware/          usage tracking
+    models/              SQLAlchemy models + Pydantic schemas
+    services/            LLM, email, citations, translation
+    main.py              app entrypoint (creates DB tables on startup)
+  data/                  PubMed fetcher
+frontend/                Next.js 14 app (App Router, TypeScript, Tailwind)
+  app/                   pages
+  components/            UI components
+  lib/                   API client, contexts, helpers
+```
 
-## 🎯 What is MedEvidence AI?
+## Local development
 
-MedEvidence AI is an evidence-based medical research platform that:
-- ✅ Answers medical research questions using real literature
-- ✅ Provides citations for every answer
-- ✅ Searches millions of medical papers
-- ✅ Explains complex medical concepts
-- ✅ Helps researchers save hours of reading
+Prerequisites: Python 3.11, Node.js 18+, a [Groq API key](https://console.groq.com).
 
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Python 3.11+
-- Node.js 18+
-- Anthropic API key (for Claude)
-- Pinecone API key (for vector DB)
-
-### Backend Setup
+**Backend**
 
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env
-# Edit .env with your API keys
-uvicorn app.main:app --reload
+cp env.example .env             # then fill in GROQ_API_KEY and SECRET_KEY
+python run_server.py            # http://localhost:8000, docs at /docs
 ```
 
-### Frontend Setup
+**Frontend**
 
 ```bash
 cd frontend
 npm install
-npm run dev
+cp env.example .env.local       # set NEXT_PUBLIC_API_URL=http://localhost:8000
+npm run dev                     # http://localhost:3000
 ```
 
-## 📁 Project Structure
+## Formatting
 
-```
-researchgpt/
-├── backend/          # FastAPI backend
-├── frontend/         # Next.js frontend
-├── data/             # Data pipeline
-└── docs/             # Documentation
+```bash
+cd frontend && npm run format && npm run lint   # Prettier + ESLint
+cd backend && pip install black && black .      # Black (config in pyproject.toml)
 ```
 
-## 🛠️ Tech Stack
+## Configuration
 
-- **Backend:** FastAPI, Python
-- **Frontend:** Next.js, React, TypeScript
-- **LLM:** Claude 3.5 Sonnet (Anthropic)
-- **Vector DB:** Pinecone
-- **RAG:** LangChain
+All backend settings live in [backend/app/core/config.py](backend/app/core/config.py) and can be overridden by environment variables of the same name (case-insensitive). See [backend/env.example](backend/env.example).
 
-## 📚 Documentation
+| Variable | Required | Notes |
+|---|---|---|
+| `GROQ_API_KEY` | yes | LLM answers |
+| `SECRET_KEY` | yes | JWT signing; use a long random string |
+| `FRONTEND_URL` | yes | CORS + links in emails |
+| `DATABASE_URL` | prod | Postgres URL. Defaults to local SQLite, which is wiped on every Render deploy |
+| `DEBUG` | prod | Set `False` in production (restricts CORS) |
+| `LLM_MODEL` | no | Groq model id, default `openai/gpt-oss-120b` |
+| `SMTP_USERNAME` / `SMTP_PASSWORD` | no | Gmail address + [app password](https://myaccount.google.com/apppasswords) for contact form / verification emails |
+| `SENTRY_DSN` | no | Error tracking |
 
-- [Product Specification](MEDICAL_RESEARCH_LLM_SPEC.md)
-- [Technical Architecture](TECHNICAL_ARCHITECTURE.md)
-- [MVP Roadmap](MVP_ROADMAP.md)
+Frontend: `NEXT_PUBLIC_API_URL` = backend base URL.
 
-## 🎯 Current Status
+## Deployment
 
-**Phase:** MVP Development (Week 1-2)
+- **Backend (Render):** root directory `backend`, build `pip install -r requirements.txt`, start `uvicorn app.main:app --host 0.0.0.0 --port $PORT` (see [backend/render.yaml](backend/render.yaml)). Set the env vars above in the Render dashboard.
+- **Frontend:** any Next.js host (Vercel, Render). Set `NEXT_PUBLIC_API_URL`.
 
-- ✅ Project structure set up
-- ✅ Backend API skeleton
-- ✅ Frontend UI complete
-- ✅ Frontend-Backend integration
-- ⬜ Data pipeline (in progress)
-- ⬜ Vector DB setup (in progress)
+## License
 
-## 🤝 Contributing
-
-This is an open-source project. Contributions welcome!
-
-## 📄 License
-
-MIT License
-
----
-
-**Built with ❤️ for medical researchers**
+MIT

@@ -1,9 +1,18 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { 
-  BarChart3, TrendingUp, Clock, AlertCircle, Activity, Zap, 
-  Search, MessageSquare, Calendar, Server, RefreshCw 
+import { useState, useEffect, useCallback } from 'react'
+import {
+  BarChart3,
+  TrendingUp,
+  Clock,
+  AlertCircle,
+  Activity,
+  Zap,
+  Search,
+  MessageSquare,
+  Calendar,
+  Server,
+  RefreshCw,
 } from 'lucide-react'
 import { dashboardApi, type UsageStats, type EndpointUsage, type UsageLog } from '@/lib/api'
 import { useToast } from '@/lib/toast-context'
@@ -16,17 +25,15 @@ export default function UsageAnalytics() {
   const [recentUsage, setRecentUsage] = useState<UsageLog[]>([])
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month'>('month')
 
-  useEffect(() => {
-    loadUsageData()
-  }, [selectedPeriod])
-
-  const loadUsageData = async () => {
+  const loadUsageData = useCallback(async () => {
     setLoading(true)
     try {
       const [statsData, endpointData, recentData] = await Promise.all([
         dashboardApi.getUsageStats(),
-        dashboardApi.getEndpointUsage(selectedPeriod === 'today' ? 1 : selectedPeriod === 'week' ? 7 : 30),
-        dashboardApi.getRecentUsage(20)
+        dashboardApi.getEndpointUsage(
+          selectedPeriod === 'today' ? 1 : selectedPeriod === 'week' ? 7 : 30,
+        ),
+        dashboardApi.getRecentUsage(20),
       ])
       setStats(statsData)
       setEndpointUsage(endpointData)
@@ -37,7 +44,11 @@ export default function UsageAnalytics() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedPeriod, showToast])
+
+  useEffect(() => {
+    loadUsageData()
+  }, [loadUsageData])
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -89,7 +100,9 @@ export default function UsageAnalytics() {
             <BarChart3 className="w-6 h-6" />
             <span>Usage Analytics</span>
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">Track your API usage and performance metrics</p>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            Track your API usage and performance metrics
+          </p>
         </div>
         <div className="flex items-center space-x-2">
           <select
@@ -119,9 +132,11 @@ export default function UsageAnalytics() {
             <TrendingUp className="w-5 h-5 text-emerald-500" />
           </div>
           <p className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
-            {selectedPeriod === 'today' ? stats.queries_today : 
-             selectedPeriod === 'week' ? stats.queries_this_week : 
-             stats.queries_this_month}
+            {selectedPeriod === 'today'
+              ? stats.queries_today
+              : selectedPeriod === 'week'
+                ? stats.queries_this_week
+                : stats.queries_this_month}
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-400">Queries ({selectedPeriod})</p>
           <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-2">
@@ -134,9 +149,11 @@ export default function UsageAnalytics() {
             <Search className="w-8 h-8 text-teal-600" />
           </div>
           <p className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
-            {selectedPeriod === 'today' ? stats.searches_today : 
-             selectedPeriod === 'week' ? stats.searches_this_week : 
-             stats.searches_this_month}
+            {selectedPeriod === 'today'
+              ? stats.searches_today
+              : selectedPeriod === 'week'
+                ? stats.searches_this_week
+                : stats.searches_this_month}
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-400">Searches ({selectedPeriod})</p>
           <p className="text-xs text-teal-600 dark:text-teal-400 mt-2">
@@ -154,22 +171,20 @@ export default function UsageAnalytics() {
               : 'N/A'}
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-400">Avg Response Time</p>
-          <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
-            Last 30 days
-          </p>
+          <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">Last 30 days</p>
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-100 dark:border-gray-700">
           <div className="flex items-center justify-between mb-2">
-            <AlertCircle className={`w-8 h-8 ${stats.error_rate > 5 ? 'text-red-600' : stats.error_rate > 1 ? 'text-yellow-600' : 'text-emerald-600'}`} />
+            <AlertCircle
+              className={`w-8 h-8 ${stats.error_rate > 5 ? 'text-red-600' : stats.error_rate > 1 ? 'text-yellow-600' : 'text-emerald-600'}`}
+            />
           </div>
           <p className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
             {stats.error_rate.toFixed(2)}%
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-400">Error Rate</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-            Last 30 days
-          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Last 30 days</p>
         </div>
       </div>
 
@@ -182,7 +197,7 @@ export default function UsageAnalytics() {
           </h3>
           <div className="h-64 flex items-end space-x-1">
             {stats.usage_by_day.map((day, idx) => {
-              const maxUsage = Math.max(...stats.usage_by_day.map(d => d.total))
+              const maxUsage = Math.max(...stats.usage_by_day.map((d) => d.total))
               const height = maxUsage > 0 ? (day.total / maxUsage) * 100 : 0
               return (
                 <div key={idx} className="flex-1 flex flex-col items-center space-y-1">
@@ -222,7 +237,10 @@ export default function UsageAnalytics() {
           </h3>
           <div className="space-y-3">
             {endpointUsage.map((endpoint) => (
-              <div key={endpoint.endpoint} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+              <div
+                key={endpoint.endpoint}
+                className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50"
+              >
                 <div className="flex-1">
                   <p className="font-medium text-gray-900 dark:text-white">{endpoint.endpoint}</p>
                   <div className="flex items-center space-x-4 mt-1 text-sm text-gray-600 dark:text-gray-400">
@@ -231,7 +249,9 @@ export default function UsageAnalytics() {
                       <Clock className="w-3 h-3" />
                       <span>{formatTime(endpoint.avg_response_time_ms)}</span>
                     </span>
-                    <span className={`flex items-center space-x-1 ${endpoint.error_count > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                    <span
+                      className={`flex items-center space-x-1 ${endpoint.error_count > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}
+                    >
                       <AlertCircle className="w-3 h-3" />
                       <span>{endpoint.error_count} errors</span>
                     </span>
@@ -286,7 +306,9 @@ export default function UsageAnalytics() {
                     <span>{new Date(log.created_at).toLocaleString()}</span>
                   </div>
                   {log.error_message && (
-                    <p className="text-xs text-red-600 dark:text-red-400 mt-1">{log.error_message}</p>
+                    <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                      {log.error_message}
+                    </p>
                   )}
                 </div>
               </div>
@@ -297,4 +319,3 @@ export default function UsageAnalytics() {
     </div>
   )
 }
-

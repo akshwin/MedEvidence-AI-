@@ -1,7 +1,19 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Search, Trash2, Share2, X, MessageSquare, Calendar, FileText, Loader2, Archive, ArchiveRestore, MessageSquarePlus } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import {
+  Search,
+  Trash2,
+  Share2,
+  X,
+  MessageSquare,
+  Calendar,
+  FileText,
+  Loader2,
+  Archive,
+  ArchiveRestore,
+  MessageSquarePlus,
+} from 'lucide-react'
 import { conversationsApi, ConversationData } from '@/lib/api'
 import { useToast } from '@/lib/toast-context'
 import { useAuth } from '@/lib/auth-context'
@@ -14,28 +26,23 @@ export default function ChatHistory() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showArchived, setShowArchived] = useState(false)
   const [sharingId, setSharingId] = useState<string | null>(null)
-  const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; conversationId: string | null }>({
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean
+    conversationId: string | null
+  }>({
     isOpen: false,
-    conversationId: null
+    conversationId: null,
   })
   const { showToast } = useToast()
   const { isAuthenticated } = useAuth()
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      loadConversations()
-    } else {
-      setLoading(false)
-    }
-  }, [isAuthenticated, showArchived, searchQuery])
-
-  const loadConversations = async () => {
+  const loadConversations = useCallback(async () => {
     try {
       setLoading(true)
       const data = await conversationsApi.list({
         archived: showArchived || undefined,
         search: searchQuery || undefined,
-        limit: 50
+        limit: 50,
       })
       setConversations(data)
     } catch (error) {
@@ -44,7 +51,15 @@ export default function ChatHistory() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [showArchived, searchQuery, showToast])
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadConversations()
+    } else {
+      setLoading(false)
+    }
+  }, [isAuthenticated, loadConversations])
 
   const handleDeleteClick = (id: string, e: React.MouseEvent) => {
     e.preventDefault()
@@ -78,15 +93,15 @@ export default function ChatHistory() {
   const handleShare = async (id: string, e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    
+
     // If already shared, just copy the existing link
-    const conversation = conversations.find(c => c.id === id)
+    const conversation = conversations.find((c) => c.id === id)
     if (conversation?.is_shared && conversation?.share_token) {
       const shareUrl = `${window.location.origin}/shared/${conversation.share_token}`
       await copyToClipboard(shareUrl)
       return
     }
-    
+
     setSharingId(id)
     try {
       const result = await conversationsApi.share(id)
@@ -253,14 +268,18 @@ export default function ChatHistory() {
         <div className="flex flex-col items-center justify-center py-20 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700">
           <MessageSquare className="w-16 h-16 text-gray-400 dark:text-gray-600 mb-4" />
           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            {searchQuery ? 'No conversations found' : showArchived ? 'No archived conversations' : 'No conversations yet'}
+            {searchQuery
+              ? 'No conversations found'
+              : showArchived
+                ? 'No archived conversations'
+                : 'No conversations yet'}
           </h3>
           <p className="text-gray-600 dark:text-gray-400 text-center max-w-md">
             {searchQuery
               ? 'Try a different search term'
               : showArchived
-              ? 'Archived conversations will appear here'
-              : 'Start a conversation to see it here'}
+                ? 'Archived conversations will appear here'
+                : 'Start a conversation to see it here'}
           </p>
         </div>
       ) : (
@@ -271,10 +290,7 @@ export default function ChatHistory() {
               className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-5 hover:border-emerald-300 dark:hover:border-emerald-600 hover:shadow-lg transition-all group"
             >
               <div className="flex items-start justify-between">
-                <Link
-                  href={`/conversations/${conv.id}`}
-                  className="flex-1 min-w-0 cursor-pointer"
-                >
+                <Link href={`/conversations/${conv.id}`} className="flex-1 min-w-0 cursor-pointer">
                   <div className="flex items-center space-x-3 mb-2">
                     <MessageSquare className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                     <h3 className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
@@ -289,7 +305,9 @@ export default function ChatHistory() {
                   <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
                     <div className="flex items-center space-x-1">
                       <FileText className="w-4 h-4" />
-                      <span>{conv.message_count} message{conv.message_count !== 1 ? 's' : ''}</span>
+                      <span>
+                        {conv.message_count} message{conv.message_count !== 1 ? 's' : ''}
+                      </span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <Calendar className="w-4 h-4" />
@@ -297,7 +315,10 @@ export default function ChatHistory() {
                     </div>
                   </div>
                 </Link>
-                <div className="flex items-center space-x-2 ml-4" onClick={(e) => e.stopPropagation()}>
+                <div
+                  className="flex items-center space-x-2 ml-4"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <button
                     onClick={(e) => {
                       e.preventDefault()
@@ -362,4 +383,3 @@ export default function ChatHistory() {
     </div>
   )
 }
-

@@ -28,14 +28,14 @@ export default function VerifyEmailPage() {
         setStatus('success')
         const messageText = result.message || 'Email verified successfully!'
         setMessage(messageText)
-        
+
         // Show appropriate toast based on message
         if (messageText.toLowerCase().includes('already verified')) {
           showToast('Email was already verified', 'info')
         } else {
           showToast('Email verified successfully!', 'success')
         }
-        
+
         setTimeout(() => {
           router.push('/')
         }, 2000)
@@ -44,13 +44,13 @@ export default function VerifyEmailPage() {
         console.error('Error response:', error.response)
         setStatus('error')
         let errorMessage = 'Verification failed. The link may have expired.'
-        
+
         if (error.response) {
           errorMessage = error.response.data?.detail || error.response.data?.message || errorMessage
         } else if (error.message) {
           errorMessage = error.message
         }
-        
+
         setMessage(errorMessage)
         showToast(errorMessage, 'error')
       }
@@ -82,11 +82,11 @@ export default function VerifyEmailPage() {
               <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              {message.toLowerCase().includes('already verified') ? 'Already Verified!' : 'Email Verified!'}
+              {message.toLowerCase().includes('already verified')
+                ? 'Already Verified!'
+                : 'Email Verified!'}
             </h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              {message}
-            </p>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">{message}</p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
               Redirecting to home page...
             </p>
@@ -107,9 +107,7 @@ export default function VerifyEmailPage() {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
               Verification Failed
             </h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              {message}
-            </p>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">{message}</p>
             <div className="space-y-3">
               <Link
                 href="/resend-verification"
@@ -130,4 +128,3 @@ export default function VerifyEmailPage() {
     </div>
   )
 }
-

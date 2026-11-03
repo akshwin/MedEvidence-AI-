@@ -4,19 +4,10 @@ uvicorn[standard]>=0.27.0
 python-multipart>=0.0.9
 
 # LLM and RAG
-langchain
-langchain-openai
-langchain-anthropic
 langchain-groq
-openai
-anthropic>=0.16.0,<1.0.0
-
-# Vector Database
-pinecone>=3.0.0
 
 # Data processing
 requests
-beautifulsoup4
 
 # Database
 sqlalchemy
@@ -34,11 +25,6 @@ passlib[bcrypt]
 # Newer bcrypt versions (>4.0) cause "AttributeError: module 'bcrypt' has no attribute '__about__'"
 bcrypt==3.2.2
 email-validator
-
-# Testing (optional)
-pytest
-pytest-asyncio
-httpx
 
 # Monitoring & Analytics
 sentry-sdk[fastapi]

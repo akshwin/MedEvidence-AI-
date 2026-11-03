@@ -14,9 +14,18 @@ from app.database import get_db
 from app.models.user import User
 from app.models.conversation import Conversation, Message
 from app.models.dashboard import (
-    SavedQuery, Bookmark, ReadingList, ReadingListPaper, 
-    PaperNote, Alert, UserActivity, ApiUsage, PerformanceMetric,
-    PaperAnnotation, PaperComparison, PaperRecommendation
+    SavedQuery,
+    Bookmark,
+    ReadingList,
+    ReadingListPaper,
+    PaperNote,
+    Alert,
+    UserActivity,
+    ApiUsage,
+    PerformanceMetric,
+    PaperAnnotation,
+    PaperComparison,
+    PaperRecommendation,
 )
 from app.api.routes.auth import get_current_user
 
@@ -24,6 +33,7 @@ router = APIRouter()
 
 
 # ==================== Pydantic Models ====================
+
 
 class SavedQueryCreate(BaseModel):
     query_text: str
@@ -168,46 +178,46 @@ class DashboardStatsResponse(BaseModel):
 
 # ==================== Saved Queries ====================
 
+
 @router.post("/queries", response_model=SavedQueryResponse, status_code=status.HTTP_201_CREATED)
 async def save_query(
     query_data: SavedQueryCreate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Save a query/search"""
     metadata_json = json.dumps(query_data.metadata) if query_data.metadata else None
-    
+
     saved_query = SavedQuery(
         user_id=current_user.id,
         query_text=query_data.query_text,
         query_type=query_data.query_type,
         results_count=query_data.results_count,
-        metadata_json=metadata_json
+        metadata_json=metadata_json,
     )
-    
+
     db.add(saved_query)
-    
+
     # Log activity
     activity = UserActivity(
         user_id=current_user.id,
         activity_type="saved_query",
-        activity_data_json=json.dumps({
-            "query_text": query_data.query_text,
-            "query_type": query_data.query_type
-        })
+        activity_data_json=json.dumps(
+            {"query_text": query_data.query_text, "query_type": query_data.query_type}
+        ),
     )
     db.add(activity)
-    
+
     db.commit()
     db.refresh(saved_query)
-    
+
     return SavedQueryResponse(
         id=saved_query.id,
         query_text=saved_query.query_text,
         query_type=saved_query.query_type,
         results_count=saved_query.results_count,
         created_at=saved_query.created_at,
-        metadata=json.loads(saved_query.metadata_json) if saved_query.metadata_json else None
+        metadata=json.loads(saved_query.metadata_json) if saved_query.metadata_json else None,
     )
 
 
@@ -217,72 +227,76 @@ async def list_saved_queries(
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """List saved queries"""
     query = db.query(SavedQuery).filter(SavedQuery.user_id == current_user.id)
-    
+
     if query_type:
         query = query.filter(SavedQuery.query_type == query_type)
-    
+
     queries = query.order_by(desc(SavedQuery.created_at)).offset(offset).limit(limit).all()
-    
+
     result = []
     for q in queries:
-        result.append(SavedQueryResponse(
-            id=q.id,
-            query_text=q.query_text,
-            query_type=q.query_type,
-            results_count=q.results_count,
-            created_at=q.created_at,
-            metadata=json.loads(q.metadata_json) if q.metadata_json else None
-        ))
-    
+        result.append(
+            SavedQueryResponse(
+                id=q.id,
+                query_text=q.query_text,
+                query_type=q.query_type,
+                results_count=q.results_count,
+                created_at=q.created_at,
+                metadata=json.loads(q.metadata_json) if q.metadata_json else None,
+            )
+        )
+
     return result
 
 
 @router.delete("/queries/{query_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_saved_query(
-    query_id: str,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    query_id: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     """Delete a saved query"""
-    query = db.query(SavedQuery).filter(
-        and_(SavedQuery.id == query_id, SavedQuery.user_id == current_user.id)
-    ).first()
-    
+    query = (
+        db.query(SavedQuery)
+        .filter(and_(SavedQuery.id == query_id, SavedQuery.user_id == current_user.id))
+        .first()
+    )
+
     if not query:
         raise HTTPException(status_code=404, detail="Saved query not found")
-    
+
     db.delete(query)
     db.commit()
-    
+
     return None
 
 
 # ==================== Bookmarks ====================
 
+
 @router.post("/bookmarks", response_model=BookmarkResponse, status_code=status.HTTP_201_CREATED)
 async def create_bookmark(
     bookmark_data: BookmarkCreate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Bookmark a paper"""
     # Check if already bookmarked
-    existing = db.query(Bookmark).filter(
-        and_(
-            Bookmark.user_id == current_user.id,
-            Bookmark.paper_id == bookmark_data.paper_id
+    existing = (
+        db.query(Bookmark)
+        .filter(
+            and_(Bookmark.user_id == current_user.id, Bookmark.paper_id == bookmark_data.paper_id)
         )
-    ).first()
-    
+        .first()
+    )
+
     if existing:
         raise HTTPException(status_code=400, detail="Paper already bookmarked")
-    
+
     authors_json = json.dumps(bookmark_data.paper_authors) if bookmark_data.paper_authors else None
-    
+
     bookmark = Bookmark(
         user_id=current_user.id,
         paper_id=bookmark_data.paper_id,
@@ -290,25 +304,24 @@ async def create_bookmark(
         paper_authors=authors_json,
         paper_year=bookmark_data.paper_year,
         paper_journal=bookmark_data.paper_journal,
-        notes=bookmark_data.notes
+        notes=bookmark_data.notes,
     )
-    
+
     db.add(bookmark)
-    
+
     # Log activity
     activity = UserActivity(
         user_id=current_user.id,
         activity_type="bookmark",
-        activity_data_json=json.dumps({
-            "paper_id": bookmark_data.paper_id,
-            "paper_title": bookmark_data.paper_title
-        })
+        activity_data_json=json.dumps(
+            {"paper_id": bookmark_data.paper_id, "paper_title": bookmark_data.paper_title}
+        ),
     )
     db.add(activity)
-    
+
     db.commit()
     db.refresh(bookmark)
-    
+
     return BookmarkResponse(
         id=bookmark.id,
         paper_id=bookmark.paper_id,
@@ -317,7 +330,7 @@ async def create_bookmark(
         paper_year=bookmark.paper_year,
         paper_journal=bookmark.paper_journal,
         notes=bookmark.notes,
-        created_at=bookmark.created_at
+        created_at=bookmark.created_at,
     )
 
 
@@ -326,98 +339,102 @@ async def list_bookmarks(
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """List bookmarked papers"""
-    bookmarks = db.query(Bookmark).filter(
-        Bookmark.user_id == current_user.id
-    ).order_by(desc(Bookmark.created_at)).offset(offset).limit(limit).all()
-    
+    bookmarks = (
+        db.query(Bookmark)
+        .filter(Bookmark.user_id == current_user.id)
+        .order_by(desc(Bookmark.created_at))
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
     result = []
     for b in bookmarks:
-        result.append(BookmarkResponse(
-            id=b.id,
-            paper_id=b.paper_id,
-            paper_title=b.paper_title,
-            paper_authors=json.loads(b.paper_authors) if b.paper_authors else None,
-            paper_year=b.paper_year,
-            paper_journal=b.paper_journal,
-            notes=b.notes,
-            created_at=b.created_at
-        ))
-    
+        result.append(
+            BookmarkResponse(
+                id=b.id,
+                paper_id=b.paper_id,
+                paper_title=b.paper_title,
+                paper_authors=json.loads(b.paper_authors) if b.paper_authors else None,
+                paper_year=b.paper_year,
+                paper_journal=b.paper_journal,
+                notes=b.notes,
+                created_at=b.created_at,
+            )
+        )
+
     return result
 
 
 @router.delete("/bookmarks/{bookmark_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_bookmark(
-    bookmark_id: str,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    bookmark_id: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     """Remove a bookmark"""
-    bookmark = db.query(Bookmark).filter(
-        and_(Bookmark.id == bookmark_id, Bookmark.user_id == current_user.id)
-    ).first()
-    
+    bookmark = (
+        db.query(Bookmark)
+        .filter(and_(Bookmark.id == bookmark_id, Bookmark.user_id == current_user.id))
+        .first()
+    )
+
     if not bookmark:
         raise HTTPException(status_code=404, detail="Bookmark not found")
-    
+
     db.delete(bookmark)
     db.commit()
-    
+
     return None
 
 
 @router.get("/bookmarks/check/{paper_id}", response_model=dict)
 async def check_bookmark(
-    paper_id: str,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    paper_id: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     """Check if a paper is bookmarked"""
-    bookmark = db.query(Bookmark).filter(
-        and_(
-            Bookmark.user_id == current_user.id,
-            Bookmark.paper_id == paper_id
-        )
-    ).first()
-    
+    bookmark = (
+        db.query(Bookmark)
+        .filter(and_(Bookmark.user_id == current_user.id, Bookmark.paper_id == paper_id))
+        .first()
+    )
+
     return {"is_bookmarked": bookmark is not None, "bookmark_id": bookmark.id if bookmark else None}
 
 
 # ==================== Reading Lists ====================
 
-@router.post("/reading-lists", response_model=ReadingListResponse, status_code=status.HTTP_201_CREATED)
+
+@router.post(
+    "/reading-lists", response_model=ReadingListResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_reading_list(
     list_data: ReadingListCreate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Create a reading list"""
     reading_list = ReadingList(
         user_id=current_user.id,
         name=list_data.name,
         description=list_data.description,
-        is_public=list_data.is_public
+        is_public=list_data.is_public,
     )
-    
+
     db.add(reading_list)
-    
+
     # Log activity
     activity = UserActivity(
         user_id=current_user.id,
         activity_type="reading_list",
-        activity_data_json=json.dumps({
-            "action": "created",
-            "list_name": list_data.name
-        })
+        activity_data_json=json.dumps({"action": "created", "list_name": list_data.name}),
     )
     db.add(activity)
-    
+
     db.commit()
     db.refresh(reading_list)
-    
+
     return ReadingListResponse(
         id=reading_list.id,
         name=reading_list.name,
@@ -425,70 +442,79 @@ async def create_reading_list(
         created_at=reading_list.created_at,
         updated_at=reading_list.updated_at,
         is_public=reading_list.is_public,
-        paper_count=0
+        paper_count=0,
     )
 
 
 @router.get("/reading-lists", response_model=List[ReadingListResponse])
 async def list_reading_lists(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     """List reading lists"""
-    lists = db.query(ReadingList).filter(
-        ReadingList.user_id == current_user.id
-    ).order_by(desc(ReadingList.updated_at)).all()
-    
+    lists = (
+        db.query(ReadingList)
+        .filter(ReadingList.user_id == current_user.id)
+        .order_by(desc(ReadingList.updated_at))
+        .all()
+    )
+
     result = []
     for lst in lists:
-        paper_count = db.query(ReadingListPaper).filter(
-            ReadingListPaper.reading_list_id == lst.id
-        ).count()
-        
-        result.append(ReadingListResponse(
-            id=lst.id,
-            name=lst.name,
-            description=lst.description,
-            created_at=lst.created_at,
-            updated_at=lst.updated_at,
-            is_public=lst.is_public,
-            paper_count=paper_count
-        ))
-    
+        paper_count = (
+            db.query(ReadingListPaper).filter(ReadingListPaper.reading_list_id == lst.id).count()
+        )
+
+        result.append(
+            ReadingListResponse(
+                id=lst.id,
+                name=lst.name,
+                description=lst.description,
+                created_at=lst.created_at,
+                updated_at=lst.updated_at,
+                is_public=lst.is_public,
+                paper_count=paper_count,
+            )
+        )
+
     return result
 
 
 @router.get("/reading-lists/{list_id}", response_model=ReadingListDetailResponse)
 async def get_reading_list(
-    list_id: str,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    list_id: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     """Get reading list details with papers"""
-    reading_list = db.query(ReadingList).filter(
-        and_(ReadingList.id == list_id, ReadingList.user_id == current_user.id)
-    ).first()
-    
+    reading_list = (
+        db.query(ReadingList)
+        .filter(and_(ReadingList.id == list_id, ReadingList.user_id == current_user.id))
+        .first()
+    )
+
     if not reading_list:
         raise HTTPException(status_code=404, detail="Reading list not found")
-    
-    papers = db.query(ReadingListPaper).filter(
-        ReadingListPaper.reading_list_id == list_id
-    ).order_by(desc(ReadingListPaper.added_at)).all()
-    
+
+    papers = (
+        db.query(ReadingListPaper)
+        .filter(ReadingListPaper.reading_list_id == list_id)
+        .order_by(desc(ReadingListPaper.added_at))
+        .all()
+    )
+
     papers_data = []
     for p in papers:
-        papers_data.append({
-            "id": p.id,
-            "paper_id": p.paper_id,
-            "paper_title": p.paper_title,
-            "paper_authors": json.loads(p.paper_authors) if p.paper_authors else None,
-            "paper_year": p.paper_year,
-            "paper_journal": p.paper_journal,
-            "notes": p.notes,
-            "added_at": p.added_at.isoformat()
-        })
-    
+        papers_data.append(
+            {
+                "id": p.id,
+                "paper_id": p.paper_id,
+                "paper_title": p.paper_title,
+                "paper_authors": json.loads(p.paper_authors) if p.paper_authors else None,
+                "paper_year": p.paper_year,
+                "paper_journal": p.paper_journal,
+                "notes": p.notes,
+                "added_at": p.added_at.isoformat(),
+            }
+        )
+
     return ReadingListDetailResponse(
         id=reading_list.id,
         name=reading_list.name,
@@ -497,38 +523,46 @@ async def get_reading_list(
         updated_at=reading_list.updated_at,
         is_public=reading_list.is_public,
         paper_count=len(papers_data),
-        papers=papers_data
+        papers=papers_data,
     )
 
 
-@router.post("/reading-lists/{list_id}/papers", response_model=dict, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/reading-lists/{list_id}/papers", response_model=dict, status_code=status.HTTP_201_CREATED
+)
 async def add_paper_to_reading_list(
     list_id: str,
     paper_data: ReadingListPaperAdd,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Add a paper to a reading list"""
-    reading_list = db.query(ReadingList).filter(
-        and_(ReadingList.id == list_id, ReadingList.user_id == current_user.id)
-    ).first()
-    
+    reading_list = (
+        db.query(ReadingList)
+        .filter(and_(ReadingList.id == list_id, ReadingList.user_id == current_user.id))
+        .first()
+    )
+
     if not reading_list:
         raise HTTPException(status_code=404, detail="Reading list not found")
-    
+
     # Check if paper already in list
-    existing = db.query(ReadingListPaper).filter(
-        and_(
-            ReadingListPaper.reading_list_id == list_id,
-            ReadingListPaper.paper_id == paper_data.paper_id
+    existing = (
+        db.query(ReadingListPaper)
+        .filter(
+            and_(
+                ReadingListPaper.reading_list_id == list_id,
+                ReadingListPaper.paper_id == paper_data.paper_id,
+            )
         )
-    ).first()
-    
+        .first()
+    )
+
     if existing:
         raise HTTPException(status_code=400, detail="Paper already in reading list")
-    
+
     authors_json = json.dumps(paper_data.paper_authors) if paper_data.paper_authors else None
-    
+
     list_paper = ReadingListPaper(
         reading_list_id=list_id,
         paper_id=paper_data.paper_id,
@@ -536,15 +570,15 @@ async def add_paper_to_reading_list(
         paper_authors=authors_json,
         paper_year=paper_data.paper_year,
         paper_journal=paper_data.paper_journal,
-        notes=paper_data.notes
+        notes=paper_data.notes,
     )
-    
+
     db.add(list_paper)
     reading_list.updated_at = datetime.utcnow()
-    
+
     db.commit()
     db.refresh(list_paper)
-    
+
     return {"id": list_paper.id, "message": "Paper added to reading list"}
 
 
@@ -553,89 +587,90 @@ async def remove_paper_from_reading_list(
     list_id: str,
     paper_id: str,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Remove a paper from a reading list"""
-    reading_list = db.query(ReadingList).filter(
-        and_(ReadingList.id == list_id, ReadingList.user_id == current_user.id)
-    ).first()
-    
+    reading_list = (
+        db.query(ReadingList)
+        .filter(and_(ReadingList.id == list_id, ReadingList.user_id == current_user.id))
+        .first()
+    )
+
     if not reading_list:
         raise HTTPException(status_code=404, detail="Reading list not found")
-    
-    list_paper = db.query(ReadingListPaper).filter(
-        and_(
-            ReadingListPaper.reading_list_id == list_id,
-            ReadingListPaper.paper_id == paper_id
+
+    list_paper = (
+        db.query(ReadingListPaper)
+        .filter(
+            and_(ReadingListPaper.reading_list_id == list_id, ReadingListPaper.paper_id == paper_id)
         )
-    ).first()
-    
+        .first()
+    )
+
     if not list_paper:
         raise HTTPException(status_code=404, detail="Paper not found in reading list")
-    
+
     db.delete(list_paper)
     reading_list.updated_at = datetime.utcnow()
     db.commit()
-    
+
     return None
 
 
 @router.delete("/reading-lists/{list_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_reading_list(
-    list_id: str,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    list_id: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     """Delete a reading list"""
-    reading_list = db.query(ReadingList).filter(
-        and_(ReadingList.id == list_id, ReadingList.user_id == current_user.id)
-    ).first()
-    
+    reading_list = (
+        db.query(ReadingList)
+        .filter(and_(ReadingList.id == list_id, ReadingList.user_id == current_user.id))
+        .first()
+    )
+
     if not reading_list:
         raise HTTPException(status_code=404, detail="Reading list not found")
-    
+
     db.delete(reading_list)
     db.commit()
-    
+
     return None
 
 
 # ==================== Paper Notes ====================
 
+
 @router.post("/notes", response_model=PaperNoteResponse, status_code=status.HTTP_201_CREATED)
 async def create_note(
     note_data: PaperNoteCreate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Create a note on a paper"""
     tags_json = json.dumps(note_data.tags) if note_data.tags else None
-    
+
     note = PaperNote(
         user_id=current_user.id,
         paper_id=note_data.paper_id,
         paper_title=note_data.paper_title,
         title=note_data.title,
         content=note_data.content,
-        tags_json=tags_json
+        tags_json=tags_json,
     )
-    
+
     db.add(note)
-    
+
     # Log activity
     activity = UserActivity(
         user_id=current_user.id,
         activity_type="note",
-        activity_data_json=json.dumps({
-            "paper_id": note_data.paper_id,
-            "action": "created"
-        })
+        activity_data_json=json.dumps({"paper_id": note_data.paper_id, "action": "created"}),
     )
     db.add(activity)
-    
+
     db.commit()
     db.refresh(note)
-    
+
     return PaperNoteResponse(
         id=note.id,
         paper_id=note.paper_id,
@@ -644,7 +679,7 @@ async def create_note(
         content=note.content,
         tags=json.loads(note.tags_json) if note.tags_json else None,
         created_at=note.created_at,
-        updated_at=note.updated_at
+        updated_at=note.updated_at,
     )
 
 
@@ -654,29 +689,31 @@ async def list_notes(
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """List notes"""
     query = db.query(PaperNote).filter(PaperNote.user_id == current_user.id)
-    
+
     if paper_id:
         query = query.filter(PaperNote.paper_id == paper_id)
-    
+
     notes = query.order_by(desc(PaperNote.updated_at)).offset(offset).limit(limit).all()
-    
+
     result = []
     for n in notes:
-        result.append(PaperNoteResponse(
-            id=n.id,
-            paper_id=n.paper_id,
-            paper_title=n.paper_title,
-            title=n.title,
-            content=n.content,
-            tags=json.loads(n.tags_json) if n.tags_json else None,
-            created_at=n.created_at,
-            updated_at=n.updated_at
-        ))
-    
+        result.append(
+            PaperNoteResponse(
+                id=n.id,
+                paper_id=n.paper_id,
+                paper_title=n.paper_title,
+                title=n.title,
+                content=n.content,
+                tags=json.loads(n.tags_json) if n.tags_json else None,
+                created_at=n.created_at,
+                updated_at=n.updated_at,
+            )
+        )
+
     return result
 
 
@@ -685,26 +722,28 @@ async def update_note(
     note_id: str,
     note_data: PaperNoteCreate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Update a note"""
-    note = db.query(PaperNote).filter(
-        and_(PaperNote.id == note_id, PaperNote.user_id == current_user.id)
-    ).first()
-    
+    note = (
+        db.query(PaperNote)
+        .filter(and_(PaperNote.id == note_id, PaperNote.user_id == current_user.id))
+        .first()
+    )
+
     if not note:
         raise HTTPException(status_code=404, detail="Note not found")
-    
+
     note.paper_id = note_data.paper_id
     note.paper_title = note_data.paper_title
     note.title = note_data.title
     note.content = note_data.content
     note.tags_json = json.dumps(note_data.tags) if note_data.tags else None
     note.updated_at = datetime.utcnow()
-    
+
     db.commit()
     db.refresh(note)
-    
+
     return PaperNoteResponse(
         id=note.id,
         paper_id=note.paper_id,
@@ -713,53 +752,54 @@ async def update_note(
         content=note.content,
         tags=json.loads(note.tags_json) if note.tags_json else None,
         created_at=note.created_at,
-        updated_at=note.updated_at
+        updated_at=note.updated_at,
     )
 
 
 @router.delete("/notes/{note_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_note(
-    note_id: str,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    note_id: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     """Delete a note"""
-    note = db.query(PaperNote).filter(
-        and_(PaperNote.id == note_id, PaperNote.user_id == current_user.id)
-    ).first()
-    
+    note = (
+        db.query(PaperNote)
+        .filter(and_(PaperNote.id == note_id, PaperNote.user_id == current_user.id))
+        .first()
+    )
+
     if not note:
         raise HTTPException(status_code=404, detail="Note not found")
-    
+
     db.delete(note)
     db.commit()
-    
+
     return None
 
 
 # ==================== Alerts ====================
 
+
 @router.post("/alerts", response_model=AlertResponse, status_code=status.HTTP_201_CREATED)
 async def create_alert(
     alert_data: AlertCreate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Create an alert for new papers"""
     filters_json = json.dumps(alert_data.filters) if alert_data.filters else None
-    
+
     alert = Alert(
         user_id=current_user.id,
         name=alert_data.name,
         query=alert_data.query,
         frequency=alert_data.frequency,
-        filters_json=filters_json
+        filters_json=filters_json,
     )
-    
+
     db.add(alert)
     db.commit()
     db.refresh(alert)
-    
+
     return AlertResponse(
         id=alert.id,
         name=alert.name,
@@ -769,7 +809,7 @@ async def create_alert(
         last_checked=alert.last_checked,
         created_at=alert.created_at,
         updated_at=alert.updated_at,
-        filters=json.loads(alert.filters_json) if alert.filters_json else None
+        filters=json.loads(alert.filters_json) if alert.filters_json else None,
     )
 
 
@@ -777,53 +817,53 @@ async def create_alert(
 async def list_alerts(
     is_active: Optional[bool] = Query(None, description="Filter by active status"),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """List alerts"""
     query = db.query(Alert).filter(Alert.user_id == current_user.id)
-    
+
     if is_active is not None:
         query = query.filter(Alert.is_active == is_active)
-    
+
     alerts = query.order_by(desc(Alert.created_at)).all()
-    
+
     result = []
     for a in alerts:
-        result.append(AlertResponse(
-            id=a.id,
-            name=a.name,
-            query=a.query,
-            is_active=a.is_active,
-            frequency=a.frequency,
-            last_checked=a.last_checked,
-            created_at=a.created_at,
-            updated_at=a.updated_at,
-            filters=json.loads(a.filters_json) if a.filters_json else None
-        ))
-    
+        result.append(
+            AlertResponse(
+                id=a.id,
+                name=a.name,
+                query=a.query,
+                is_active=a.is_active,
+                frequency=a.frequency,
+                last_checked=a.last_checked,
+                created_at=a.created_at,
+                updated_at=a.updated_at,
+                filters=json.loads(a.filters_json) if a.filters_json else None,
+            )
+        )
+
     return result
 
 
 @router.put("/alerts/{alert_id}/toggle", response_model=AlertResponse)
 async def toggle_alert(
-    alert_id: str,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    alert_id: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     """Toggle alert active status"""
-    alert = db.query(Alert).filter(
-        and_(Alert.id == alert_id, Alert.user_id == current_user.id)
-    ).first()
-    
+    alert = (
+        db.query(Alert).filter(and_(Alert.id == alert_id, Alert.user_id == current_user.id)).first()
+    )
+
     if not alert:
         raise HTTPException(status_code=404, detail="Alert not found")
-    
+
     alert.is_active = not alert.is_active
     alert.updated_at = datetime.utcnow()
-    
+
     db.commit()
     db.refresh(alert)
-    
+
     return AlertResponse(
         id=alert.id,
         name=alert.name,
@@ -833,119 +873,114 @@ async def toggle_alert(
         last_checked=alert.last_checked,
         created_at=alert.created_at,
         updated_at=alert.updated_at,
-        filters=json.loads(alert.filters_json) if alert.filters_json else None
+        filters=json.loads(alert.filters_json) if alert.filters_json else None,
     )
 
 
 @router.delete("/alerts/{alert_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_alert(
-    alert_id: str,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    alert_id: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     """Delete an alert"""
-    alert = db.query(Alert).filter(
-        and_(Alert.id == alert_id, Alert.user_id == current_user.id)
-    ).first()
-    
+    alert = (
+        db.query(Alert).filter(and_(Alert.id == alert_id, Alert.user_id == current_user.id)).first()
+    )
+
     if not alert:
         raise HTTPException(status_code=404, detail="Alert not found")
-    
+
     db.delete(alert)
     db.commit()
-    
+
     return None
 
 
 # ==================== Activity Feed ====================
 
+
 @router.get("/activity", response_model=List[ActivityResponse])
 async def get_recent_activity(
     limit: int = Query(20, ge=1, le=100),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Get recent user activity"""
-    activities = db.query(UserActivity).filter(
-        UserActivity.user_id == current_user.id
-    ).order_by(desc(UserActivity.created_at)).limit(limit).all()
-    
+    activities = (
+        db.query(UserActivity)
+        .filter(UserActivity.user_id == current_user.id)
+        .order_by(desc(UserActivity.created_at))
+        .limit(limit)
+        .all()
+    )
+
     result = []
     for a in activities:
-        result.append(ActivityResponse(
-            id=a.id,
-            activity_type=a.activity_type,
-            activity_data=json.loads(a.activity_data_json) if a.activity_data_json else {},
-            created_at=a.created_at
-        ))
-    
+        result.append(
+            ActivityResponse(
+                id=a.id,
+                activity_type=a.activity_type,
+                activity_data=json.loads(a.activity_data_json) if a.activity_data_json else {},
+                created_at=a.created_at,
+            )
+        )
+
     return result
 
 
 # ==================== Statistics ====================
 
+
 @router.get("/stats", response_model=DashboardStatsResponse)
 async def get_dashboard_stats(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     """Get dashboard statistics"""
     # Calculate date range for "this week"
     now = datetime.utcnow()
     week_ago = now - timedelta(days=7)
-    
+
     # Total counts
-    total_conversations = db.query(Conversation).filter(
-        Conversation.user_id == current_user.id
-    ).count()
-    
-    total_messages = db.query(Message).join(Conversation).filter(
-        Conversation.user_id == current_user.id
-    ).count()
-    
-    total_bookmarks = db.query(Bookmark).filter(
-        Bookmark.user_id == current_user.id
-    ).count()
-    
-    total_reading_lists = db.query(ReadingList).filter(
-        ReadingList.user_id == current_user.id
-    ).count()
-    
-    total_notes = db.query(PaperNote).filter(
-        PaperNote.user_id == current_user.id
-    ).count()
-    
-    total_saved_queries = db.query(SavedQuery).filter(
-        SavedQuery.user_id == current_user.id
-    ).count()
-    
-    total_alerts = db.query(Alert).filter(
-        Alert.user_id == current_user.id
-    ).count()
-    
+    total_conversations = (
+        db.query(Conversation).filter(Conversation.user_id == current_user.id).count()
+    )
+
+    total_messages = (
+        db.query(Message).join(Conversation).filter(Conversation.user_id == current_user.id).count()
+    )
+
+    total_bookmarks = db.query(Bookmark).filter(Bookmark.user_id == current_user.id).count()
+
+    total_reading_lists = (
+        db.query(ReadingList).filter(ReadingList.user_id == current_user.id).count()
+    )
+
+    total_notes = db.query(PaperNote).filter(PaperNote.user_id == current_user.id).count()
+
+    total_saved_queries = db.query(SavedQuery).filter(SavedQuery.user_id == current_user.id).count()
+
+    total_alerts = db.query(Alert).filter(Alert.user_id == current_user.id).count()
+
     # Recent activity (last 7 days)
-    recent_activity_count = db.query(UserActivity).filter(
-        and_(
-            UserActivity.user_id == current_user.id,
-            UserActivity.created_at >= week_ago
-        )
-    ).count()
-    
+    recent_activity_count = (
+        db.query(UserActivity)
+        .filter(and_(UserActivity.user_id == current_user.id, UserActivity.created_at >= week_ago))
+        .count()
+    )
+
     # This week's conversations and messages
-    conversations_this_week = db.query(Conversation).filter(
-        and_(
-            Conversation.user_id == current_user.id,
-            Conversation.created_at >= week_ago
-        )
-    ).count()
-    
-    messages_this_week = db.query(Message).join(Conversation).filter(
-        and_(
-            Conversation.user_id == current_user.id,
-            Message.created_at >= week_ago
-        )
-    ).count()
-    
+    conversations_this_week = (
+        db.query(Conversation)
+        .filter(and_(Conversation.user_id == current_user.id, Conversation.created_at >= week_ago))
+        .count()
+    )
+
+    messages_this_week = (
+        db.query(Message)
+        .join(Conversation)
+        .filter(and_(Conversation.user_id == current_user.id, Message.created_at >= week_ago))
+        .count()
+    )
+
     return DashboardStatsResponse(
         total_conversations=total_conversations,
         total_messages=total_messages,
@@ -956,14 +991,16 @@ async def get_dashboard_stats(
         total_alerts=total_alerts,
         recent_activity_count=recent_activity_count,
         conversations_this_week=conversations_this_week,
-        messages_this_week=messages_this_week
+        messages_this_week=messages_this_week,
     )
 
 
 # ==================== Usage Analytics ====================
 
+
 class UsageStatsResponse(BaseModel):
     """Usage statistics response"""
+
     total_queries: int
     total_searches: int
     queries_today: int
@@ -980,6 +1017,7 @@ class UsageStatsResponse(BaseModel):
 
 class EndpointUsageResponse(BaseModel):
     """Endpoint usage details"""
+
     endpoint: str
     count: int
     avg_response_time_ms: float
@@ -989,8 +1027,7 @@ class EndpointUsageResponse(BaseModel):
 
 @router.get("/usage/stats", response_model=UsageStatsResponse)
 async def get_usage_stats(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     """Get comprehensive usage statistics for the current user"""
     try:
@@ -1010,153 +1047,191 @@ async def get_usage_stats(
             average_response_time_ms=0.0,
             error_rate=0.0,
             most_used_endpoints=[],
-            usage_by_day=[]
+            usage_by_day=[],
         )
-    
+
     now = datetime.utcnow()
     today_start = datetime(now.year, now.month, now.day)
     week_ago = now - timedelta(days=7)
     month_ago = now - timedelta(days=30)
-    
+
     # Total counts
-    total_queries = db.query(ApiUsage).filter(
-        and_(
-            ApiUsage.user_id == current_user.id,
-            ApiUsage.endpoint == "/api/query"
-        )
-    ).count()
-    
-    total_searches = db.query(ApiUsage).filter(
-        and_(
-            ApiUsage.user_id == current_user.id,
-            ApiUsage.endpoint == "/api/search"
-        )
-    ).count()
-    
+    total_queries = (
+        db.query(ApiUsage)
+        .filter(and_(ApiUsage.user_id == current_user.id, ApiUsage.endpoint == "/api/query"))
+        .count()
+    )
+
+    total_searches = (
+        db.query(ApiUsage)
+        .filter(and_(ApiUsage.user_id == current_user.id, ApiUsage.endpoint == "/api/search"))
+        .count()
+    )
+
     # Today's counts
-    queries_today = db.query(ApiUsage).filter(
-        and_(
-            ApiUsage.user_id == current_user.id,
-            ApiUsage.endpoint == "/api/query",
-            ApiUsage.created_at >= today_start
+    queries_today = (
+        db.query(ApiUsage)
+        .filter(
+            and_(
+                ApiUsage.user_id == current_user.id,
+                ApiUsage.endpoint == "/api/query",
+                ApiUsage.created_at >= today_start,
+            )
         )
-    ).count()
-    
-    searches_today = db.query(ApiUsage).filter(
-        and_(
-            ApiUsage.user_id == current_user.id,
-            ApiUsage.endpoint == "/api/search",
-            ApiUsage.created_at >= today_start
+        .count()
+    )
+
+    searches_today = (
+        db.query(ApiUsage)
+        .filter(
+            and_(
+                ApiUsage.user_id == current_user.id,
+                ApiUsage.endpoint == "/api/search",
+                ApiUsage.created_at >= today_start,
+            )
         )
-    ).count()
-    
+        .count()
+    )
+
     # This week's counts
-    queries_this_week = db.query(ApiUsage).filter(
-        and_(
-            ApiUsage.user_id == current_user.id,
-            ApiUsage.endpoint == "/api/query",
-            ApiUsage.created_at >= week_ago
+    queries_this_week = (
+        db.query(ApiUsage)
+        .filter(
+            and_(
+                ApiUsage.user_id == current_user.id,
+                ApiUsage.endpoint == "/api/query",
+                ApiUsage.created_at >= week_ago,
+            )
         )
-    ).count()
-    
-    searches_this_week = db.query(ApiUsage).filter(
-        and_(
-            ApiUsage.user_id == current_user.id,
-            ApiUsage.endpoint == "/api/search",
-            ApiUsage.created_at >= week_ago
+        .count()
+    )
+
+    searches_this_week = (
+        db.query(ApiUsage)
+        .filter(
+            and_(
+                ApiUsage.user_id == current_user.id,
+                ApiUsage.endpoint == "/api/search",
+                ApiUsage.created_at >= week_ago,
+            )
         )
-    ).count()
-    
+        .count()
+    )
+
     # This month's counts
-    queries_this_month = db.query(ApiUsage).filter(
-        and_(
-            ApiUsage.user_id == current_user.id,
-            ApiUsage.endpoint == "/api/query",
-            ApiUsage.created_at >= month_ago
+    queries_this_month = (
+        db.query(ApiUsage)
+        .filter(
+            and_(
+                ApiUsage.user_id == current_user.id,
+                ApiUsage.endpoint == "/api/query",
+                ApiUsage.created_at >= month_ago,
+            )
         )
-    ).count()
-    
-    searches_this_month = db.query(ApiUsage).filter(
-        and_(
-            ApiUsage.user_id == current_user.id,
-            ApiUsage.endpoint == "/api/search",
-            ApiUsage.created_at >= month_ago
+        .count()
+    )
+
+    searches_this_month = (
+        db.query(ApiUsage)
+        .filter(
+            and_(
+                ApiUsage.user_id == current_user.id,
+                ApiUsage.endpoint == "/api/search",
+                ApiUsage.created_at >= month_ago,
+            )
         )
-    ).count()
-    
+        .count()
+    )
+
     # Average response time (last 30 days)
-    recent_usage = db.query(ApiUsage).filter(
-        and_(
-            ApiUsage.user_id == current_user.id,
-            ApiUsage.created_at >= month_ago,
-            ApiUsage.response_time_ms.isnot(None)
+    recent_usage = (
+        db.query(ApiUsage)
+        .filter(
+            and_(
+                ApiUsage.user_id == current_user.id,
+                ApiUsage.created_at >= month_ago,
+                ApiUsage.response_time_ms.isnot(None),
+            )
         )
-    ).all()
-    
+        .all()
+    )
+
     avg_response_time = 0.0
     if recent_usage:
         total_time = sum(u.response_time_ms for u in recent_usage if u.response_time_ms)
         avg_response_time = total_time / len(recent_usage) if recent_usage else 0.0
-    
+
     # Error rate (last 30 days)
     total_requests = len(recent_usage)
     error_count = sum(1 for u in recent_usage if u.status_code >= 400)
     error_rate = (error_count / total_requests * 100) if total_requests > 0 else 0.0
-    
+
     # Most used endpoints (last 30 days)
-    endpoint_stats = db.query(
-        ApiUsage.endpoint,
-        func.count(ApiUsage.id).label('count'),
-        func.avg(ApiUsage.response_time_ms).label('avg_time')
-    ).filter(
-        and_(
-            ApiUsage.user_id == current_user.id,
-            ApiUsage.created_at >= month_ago
+    endpoint_stats = (
+        db.query(
+            ApiUsage.endpoint,
+            func.count(ApiUsage.id).label("count"),
+            func.avg(ApiUsage.response_time_ms).label("avg_time"),
         )
-    ).group_by(ApiUsage.endpoint).order_by(desc('count')).limit(10).all()
-    
+        .filter(and_(ApiUsage.user_id == current_user.id, ApiUsage.created_at >= month_ago))
+        .group_by(ApiUsage.endpoint)
+        .order_by(desc("count"))
+        .limit(10)
+        .all()
+    )
+
     most_used_endpoints = [
         {
             "endpoint": endpoint,
             "count": count,
-            "avg_response_time_ms": float(avg_time) if avg_time else 0.0
+            "avg_response_time_ms": float(avg_time) if avg_time else 0.0,
         }
         for endpoint, count, avg_time in endpoint_stats
     ]
-    
+
     # Usage by day (last 30 days)
     usage_by_day = []
     for i in range(30):
         day_start = datetime(now.year, now.month, now.day) - timedelta(days=i)
         day_end = day_start + timedelta(days=1)
-        
-        day_queries = db.query(ApiUsage).filter(
-            and_(
-                ApiUsage.user_id == current_user.id,
-                ApiUsage.endpoint == "/api/query",
-                ApiUsage.created_at >= day_start,
-                ApiUsage.created_at < day_end
+
+        day_queries = (
+            db.query(ApiUsage)
+            .filter(
+                and_(
+                    ApiUsage.user_id == current_user.id,
+                    ApiUsage.endpoint == "/api/query",
+                    ApiUsage.created_at >= day_start,
+                    ApiUsage.created_at < day_end,
+                )
             )
-        ).count()
-        
-        day_searches = db.query(ApiUsage).filter(
-            and_(
-                ApiUsage.user_id == current_user.id,
-                ApiUsage.endpoint == "/api/search",
-                ApiUsage.created_at >= day_start,
-                ApiUsage.created_at < day_end
+            .count()
+        )
+
+        day_searches = (
+            db.query(ApiUsage)
+            .filter(
+                and_(
+                    ApiUsage.user_id == current_user.id,
+                    ApiUsage.endpoint == "/api/search",
+                    ApiUsage.created_at >= day_start,
+                    ApiUsage.created_at < day_end,
+                )
             )
-        ).count()
-        
-        usage_by_day.append({
-            "date": day_start.isoformat(),
-            "queries": day_queries,
-            "searches": day_searches,
-            "total": day_queries + day_searches
-        })
-    
+            .count()
+        )
+
+        usage_by_day.append(
+            {
+                "date": day_start.isoformat(),
+                "queries": day_queries,
+                "searches": day_searches,
+                "total": day_queries + day_searches,
+            }
+        )
+
     usage_by_day.reverse()  # Most recent first
-    
+
     return UsageStatsResponse(
         total_queries=total_queries,
         total_searches=total_searches,
@@ -1169,7 +1244,7 @@ async def get_usage_stats(
         average_response_time_ms=avg_response_time,
         error_rate=error_rate,
         most_used_endpoints=most_used_endpoints,
-        usage_by_day=usage_by_day
+        usage_by_day=usage_by_day,
     )
 
 
@@ -1177,7 +1252,7 @@ async def get_usage_stats(
 async def get_endpoint_usage(
     days: int = Query(30, ge=1, le=365, description="Number of days to analyze"),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Get detailed usage statistics by endpoint"""
     try:
@@ -1186,32 +1261,35 @@ async def get_endpoint_usage(
     except Exception:
         # Table doesn't exist, return empty list
         return []
-    
+
     date_limit = datetime.utcnow() - timedelta(days=days)
-    
-    endpoint_stats = db.query(
-        ApiUsage.endpoint,
-        func.count(ApiUsage.id).label('count'),
-        func.avg(ApiUsage.response_time_ms).label('avg_time'),
-        func.sum(func.cast(ApiUsage.status_code >= 400, Integer)).label('error_count'),
-        func.sum(func.cast(ApiUsage.status_code < 400, Integer)).label('success_count')
-    ).filter(
-        and_(
-            ApiUsage.user_id == current_user.id,
-            ApiUsage.created_at >= date_limit
+
+    endpoint_stats = (
+        db.query(
+            ApiUsage.endpoint,
+            func.count(ApiUsage.id).label("count"),
+            func.avg(ApiUsage.response_time_ms).label("avg_time"),
+            func.sum(func.cast(ApiUsage.status_code >= 400, Integer)).label("error_count"),
+            func.sum(func.cast(ApiUsage.status_code < 400, Integer)).label("success_count"),
         )
-    ).group_by(ApiUsage.endpoint).order_by(desc('count')).all()
-    
+        .filter(and_(ApiUsage.user_id == current_user.id, ApiUsage.created_at >= date_limit))
+        .group_by(ApiUsage.endpoint)
+        .order_by(desc("count"))
+        .all()
+    )
+
     result = []
     for endpoint, count, avg_time, error_count, success_count in endpoint_stats:
-        result.append(EndpointUsageResponse(
-            endpoint=endpoint,
-            count=count,
-            avg_response_time_ms=float(avg_time) if avg_time else 0.0,
-            error_count=int(error_count) if error_count else 0,
-            success_count=int(success_count) if success_count else 0
-        ))
-    
+        result.append(
+            EndpointUsageResponse(
+                endpoint=endpoint,
+                count=count,
+                avg_response_time_ms=float(avg_time) if avg_time else 0.0,
+                error_count=int(error_count) if error_count else 0,
+                success_count=int(success_count) if success_count else 0,
+            )
+        )
+
     return result
 
 
@@ -1219,7 +1297,7 @@ async def get_endpoint_usage(
 async def get_recent_usage(
     limit: int = Query(50, ge=1, le=200),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Get recent API usage logs"""
     try:
@@ -1228,28 +1306,35 @@ async def get_recent_usage(
     except Exception:
         # Table doesn't exist, return empty list
         return []
-    
-    usage_logs = db.query(ApiUsage).filter(
-        ApiUsage.user_id == current_user.id
-    ).order_by(desc(ApiUsage.created_at)).limit(limit).all()
-    
+
+    usage_logs = (
+        db.query(ApiUsage)
+        .filter(ApiUsage.user_id == current_user.id)
+        .order_by(desc(ApiUsage.created_at))
+        .limit(limit)
+        .all()
+    )
+
     result = []
     for usage in usage_logs:
-        result.append({
-            "id": usage.id,
-            "endpoint": usage.endpoint,
-            "method": usage.method,
-            "status_code": usage.status_code,
-            "response_time_ms": usage.response_time_ms,
-            "error_message": usage.error_message,
-            "created_at": usage.created_at.isoformat(),
-            "metadata": json.loads(usage.metadata_json) if usage.metadata_json else None
-        })
-    
+        result.append(
+            {
+                "id": usage.id,
+                "endpoint": usage.endpoint,
+                "method": usage.method,
+                "status_code": usage.status_code,
+                "response_time_ms": usage.response_time_ms,
+                "error_message": usage.error_message,
+                "created_at": usage.created_at.isoformat(),
+                "metadata": json.loads(usage.metadata_json) if usage.metadata_json else None,
+            }
+        )
+
     return result
 
 
 # ==================== Paper Annotations ====================
+
 
 class PaperAnnotationCreate(BaseModel):
     paper_id: str
@@ -1281,15 +1366,17 @@ class PaperAnnotationResponse(BaseModel):
         from_attributes = True
 
 
-@router.post("/annotations", response_model=PaperAnnotationResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/annotations", response_model=PaperAnnotationResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_annotation(
     annotation_data: PaperAnnotationCreate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Create an annotation/highlight on a paper"""
     tags_json = json.dumps(annotation_data.tags) if annotation_data.tags else None
-    
+
     annotation = PaperAnnotation(
         user_id=current_user.id,
         paper_id=annotation_data.paper_id,
@@ -1300,13 +1387,13 @@ async def create_annotation(
         end_offset=annotation_data.end_offset,
         content=annotation_data.content,
         color=annotation_data.color,
-        tags_json=tags_json
+        tags_json=tags_json,
     )
-    
+
     db.add(annotation)
     db.commit()
     db.refresh(annotation)
-    
+
     return PaperAnnotationResponse(
         id=annotation.id,
         paper_id=annotation.paper_id,
@@ -1319,7 +1406,7 @@ async def create_annotation(
         color=annotation.color,
         tags=json.loads(annotation.tags_json) if annotation.tags_json else None,
         created_at=annotation.created_at,
-        updated_at=annotation.updated_at
+        updated_at=annotation.updated_at,
     )
 
 
@@ -1329,33 +1416,35 @@ async def list_annotations(
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """List annotations for the current user"""
     query = db.query(PaperAnnotation).filter(PaperAnnotation.user_id == current_user.id)
-    
+
     if paper_id:
         query = query.filter(PaperAnnotation.paper_id == paper_id)
-    
+
     annotations = query.order_by(desc(PaperAnnotation.created_at)).offset(offset).limit(limit).all()
-    
+
     result = []
     for ann in annotations:
-        result.append(PaperAnnotationResponse(
-            id=ann.id,
-            paper_id=ann.paper_id,
-            paper_title=ann.paper_title,
-            annotation_type=ann.annotation_type,
-            selected_text=ann.selected_text,
-            start_offset=ann.start_offset,
-            end_offset=ann.end_offset,
-            content=ann.content,
-            color=ann.color,
-            tags=json.loads(ann.tags_json) if ann.tags_json else None,
-            created_at=ann.created_at,
-            updated_at=ann.updated_at
-        ))
-    
+        result.append(
+            PaperAnnotationResponse(
+                id=ann.id,
+                paper_id=ann.paper_id,
+                paper_title=ann.paper_title,
+                annotation_type=ann.annotation_type,
+                selected_text=ann.selected_text,
+                start_offset=ann.start_offset,
+                end_offset=ann.end_offset,
+                content=ann.content,
+                color=ann.color,
+                tags=json.loads(ann.tags_json) if ann.tags_json else None,
+                created_at=ann.created_at,
+                updated_at=ann.updated_at,
+            )
+        )
+
     return result
 
 
@@ -1364,18 +1453,22 @@ async def update_annotation(
     annotation_id: str,
     annotation_data: PaperAnnotationCreate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Update an annotation"""
-    annotation = db.query(PaperAnnotation).filter(
-        and_(PaperAnnotation.id == annotation_id, PaperAnnotation.user_id == current_user.id)
-    ).first()
-    
+    annotation = (
+        db.query(PaperAnnotation)
+        .filter(
+            and_(PaperAnnotation.id == annotation_id, PaperAnnotation.user_id == current_user.id)
+        )
+        .first()
+    )
+
     if not annotation:
         raise HTTPException(status_code=404, detail="Annotation not found")
-    
+
     tags_json = json.dumps(annotation_data.tags) if annotation_data.tags else None
-    
+
     annotation.paper_id = annotation_data.paper_id
     annotation.paper_title = annotation_data.paper_title
     annotation.annotation_type = annotation_data.annotation_type
@@ -1385,10 +1478,10 @@ async def update_annotation(
     annotation.content = annotation_data.content
     annotation.color = annotation_data.color
     annotation.tags_json = tags_json
-    
+
     db.commit()
     db.refresh(annotation)
-    
+
     return PaperAnnotationResponse(
         id=annotation.id,
         paper_id=annotation.paper_id,
@@ -1401,7 +1494,7 @@ async def update_annotation(
         color=annotation.color,
         tags=json.loads(annotation.tags_json) if annotation.tags_json else None,
         created_at=annotation.created_at,
-        updated_at=annotation.updated_at
+        updated_at=annotation.updated_at,
     )
 
 
@@ -1409,23 +1502,28 @@ async def update_annotation(
 async def delete_annotation(
     annotation_id: str,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Delete an annotation"""
-    annotation = db.query(PaperAnnotation).filter(
-        and_(PaperAnnotation.id == annotation_id, PaperAnnotation.user_id == current_user.id)
-    ).first()
-    
+    annotation = (
+        db.query(PaperAnnotation)
+        .filter(
+            and_(PaperAnnotation.id == annotation_id, PaperAnnotation.user_id == current_user.id)
+        )
+        .first()
+    )
+
     if not annotation:
         raise HTTPException(status_code=404, detail="Annotation not found")
-    
+
     db.delete(annotation)
     db.commit()
-    
+
     return None
 
 
 # ==================== Paper Comparisons ====================
+
 
 class PaperComparisonCreate(BaseModel):
     name: Optional[str] = None
@@ -1444,35 +1542,37 @@ class PaperComparisonResponse(BaseModel):
         from_attributes = True
 
 
-@router.post("/comparisons", response_model=PaperComparisonResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/comparisons", response_model=PaperComparisonResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_comparison(
     comparison_data: PaperComparisonCreate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Create a paper comparison session"""
     if len(comparison_data.paper_ids) < 2:
         raise HTTPException(status_code=400, detail="At least 2 papers are required for comparison")
-    
+
     paper_ids_json = json.dumps(comparison_data.paper_ids)
-    
+
     comparison = PaperComparison(
-        user_id=current_user.id,
-        name=comparison_data.name,
-        paper_ids_json=paper_ids_json
+        user_id=current_user.id, name=comparison_data.name, paper_ids_json=paper_ids_json
     )
-    
+
     db.add(comparison)
     db.commit()
     db.refresh(comparison)
-    
+
     return PaperComparisonResponse(
         id=comparison.id,
         name=comparison.name,
         paper_ids=json.loads(comparison.paper_ids_json),
-        comparison_data=json.loads(comparison.comparison_data_json) if comparison.comparison_data_json else None,
+        comparison_data=(
+            json.loads(comparison.comparison_data_json) if comparison.comparison_data_json else None
+        ),
         created_at=comparison.created_at,
-        updated_at=comparison.updated_at
+        updated_at=comparison.updated_at,
     )
 
 
@@ -1481,24 +1581,33 @@ async def list_comparisons(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """List comparison sessions for the current user"""
-    comparisons = db.query(PaperComparison).filter(
-        PaperComparison.user_id == current_user.id
-    ).order_by(desc(PaperComparison.updated_at)).offset(offset).limit(limit).all()
-    
+    comparisons = (
+        db.query(PaperComparison)
+        .filter(PaperComparison.user_id == current_user.id)
+        .order_by(desc(PaperComparison.updated_at))
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
     result = []
     for comp in comparisons:
-        result.append(PaperComparisonResponse(
-            id=comp.id,
-            name=comp.name,
-            paper_ids=json.loads(comp.paper_ids_json),
-            comparison_data=json.loads(comp.comparison_data_json) if comp.comparison_data_json else None,
-            created_at=comp.created_at,
-            updated_at=comp.updated_at
-        ))
-    
+        result.append(
+            PaperComparisonResponse(
+                id=comp.id,
+                name=comp.name,
+                paper_ids=json.loads(comp.paper_ids_json),
+                comparison_data=(
+                    json.loads(comp.comparison_data_json) if comp.comparison_data_json else None
+                ),
+                created_at=comp.created_at,
+                updated_at=comp.updated_at,
+            )
+        )
+
     return result
 
 
@@ -1506,18 +1615,21 @@ async def list_comparisons(
 async def delete_comparison(
     comparison_id: str,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Delete a comparison session"""
-    comparison = db.query(PaperComparison).filter(
-        and_(PaperComparison.id == comparison_id, PaperComparison.user_id == current_user.id)
-    ).first()
-    
+    comparison = (
+        db.query(PaperComparison)
+        .filter(
+            and_(PaperComparison.id == comparison_id, PaperComparison.user_id == current_user.id)
+        )
+        .first()
+    )
+
     if not comparison:
         raise HTTPException(status_code=404, detail="Comparison not found")
-    
+
     db.delete(comparison)
     db.commit()
-    
-    return None
 
+    return None

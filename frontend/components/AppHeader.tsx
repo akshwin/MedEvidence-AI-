@@ -52,7 +52,9 @@ export default function AppHeader({
             <ThemeToggle />
             <div className="h-6 w-px bg-gray-200 dark:border-gray-700 hidden md:block" />
 
-            {rightSlot ? <div className="hidden md:flex items-center space-x-2">{rightSlot}</div> : null}
+            {rightSlot ? (
+              <div className="hidden md:flex items-center space-x-2">{rightSlot}</div>
+            ) : null}
 
             {/* Desktop nav */}
             <div className="hidden md:flex items-center space-x-1">
@@ -114,5 +116,3 @@ export default function AppHeader({
     </nav>
   )
 }
-
-

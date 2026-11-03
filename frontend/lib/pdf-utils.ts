@@ -30,15 +30,15 @@ interface TextBlock {
 function parseMarkdown(text: string): TextBlock[] {
   const blocks: TextBlock[] = []
   const lines = text.split('\n')
-  
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim()
-    
+
     if (!line) {
       blocks.push({ type: 'text', content: '' })
       continue
     }
-    
+
     // H2 headings (##)
     if (line.startsWith('## ')) {
       blocks.push({ type: 'h2', content: line.substring(3).trim() })
@@ -56,7 +56,7 @@ function parseMarkdown(text: string): TextBlock[] {
       blocks.push({ type: 'text', content: line })
     }
   }
-  
+
   return blocks
 }
 
@@ -67,7 +67,7 @@ function extractAuthorAndYear(citationText: string): { author: string; year: num
   if (match) {
     return {
       author: match[1].trim(),
-      year: parseInt(match[2], 10)
+      year: parseInt(match[2], 10),
     }
   }
   // Try without year
@@ -75,7 +75,7 @@ function extractAuthorAndYear(citationText: string): { author: string; year: num
   if (authorMatch) {
     return {
       author: authorMatch[1].trim(),
-      year: null
+      year: null,
     }
   }
   return { author: citationText.trim(), year: null }
@@ -86,38 +86,40 @@ function matchesCitation(citation: Citation, author: string, year: number | null
   // Check if any author matches
   const citationAuthors = citation.authors || []
   if (citationAuthors.length === 0) return false
-  
+
   // Normalize author name (remove commas, extra spaces, convert to lowercase)
   const normalizeAuthor = (name: string): string => {
     return name.replace(/,/g, '').trim().toLowerCase()
   }
-  
+
   const searchAuthorNormalized = normalizeAuthor(author)
-  
+
   // Check if any citation author matches
   let authorMatches = false
   for (const citationAuthor of citationAuthors) {
     const citationAuthorNormalized = normalizeAuthor(citationAuthor)
-    
+
     // Extract last name (first word before comma or first word)
     const citationLastName = citationAuthorNormalized.split(/[\s,]+/)[0]
     const searchLastName = searchAuthorNormalized.split(/[\s,]+/)[0]
-    
+
     // Check various matching patterns
-    if (citationLastName === searchLastName ||
-        citationAuthorNormalized.includes(searchLastName) ||
-        searchAuthorNormalized.includes(citationLastName) ||
-        citationAuthorNormalized === searchAuthorNormalized) {
+    if (
+      citationLastName === searchLastName ||
+      citationAuthorNormalized.includes(searchLastName) ||
+      searchAuthorNormalized.includes(citationLastName) ||
+      citationAuthorNormalized === searchAuthorNormalized
+    ) {
       authorMatches = true
       break
     }
   }
-  
+
   // Check year match if year is provided
   if (year !== null && citation.year) {
     return authorMatches && citation.year === year
   }
-  
+
   return authorMatches
 }
 
@@ -126,27 +128,27 @@ function orderCitationsByContent(citations: Citation[], answer: string): Citatio
   // Extract H3 headings (author citations) from answer
   const h3Headings: string[] = []
   const lines = answer.split('\n')
-  
+
   for (const line of lines) {
     if (line.trim().startsWith('### ')) {
       const heading = line.trim().substring(4).trim()
       h3Headings.push(heading)
     }
   }
-  
+
   // If no H3 headings found, return original order
   if (h3Headings.length === 0) {
     return citations
   }
-  
+
   // Create ordered citations array
   const orderedCitations: Citation[] = []
   const usedCitations = new Set<number>()
-  
+
   // For each H3 heading, find matching citation
   for (const heading of h3Headings) {
     const { author, year } = extractAuthorAndYear(heading)
-    
+
     // Find matching citation
     for (let i = 0; i < citations.length; i++) {
       if (!usedCitations.has(i) && matchesCitation(citations[i], author, year)) {
@@ -156,14 +158,14 @@ function orderCitationsByContent(citations: Citation[], answer: string): Citatio
       }
     }
   }
-  
+
   // Add any remaining citations that weren't matched
   for (let i = 0; i < citations.length; i++) {
     if (!usedCitations.has(i)) {
       orderedCitations.push(citations[i])
     }
   }
-  
+
   return orderedCitations
 }
 
@@ -171,11 +173,11 @@ export function downloadAnswerPDF(
   question: string,
   answer: string,
   citations: Citation[],
-  filename: string = 'medevidence-answer.pdf'
+  filename: string = 'medevidence-answer.pdf',
 ) {
   // Order citations based on their appearance in the answer content
   const orderedCitations = orderCitationsByContent(citations, answer)
-  
+
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -207,17 +209,17 @@ export function downloadAnswerPDF(
     const [r, g, b] = hexToRgb(BRAND_COLORS.primary)
     pdf.setFillColor(r, g, b)
     pdf.rect(0, 0, width, 20, 'F')
-    
+
     // Secondary color accent
     const [r2, g2, b2] = hexToRgb(BRAND_COLORS.secondary)
     pdf.setFillColor(r2, g2, b2)
     pdf.rect(0, 0, width, 3, 'F')
-    
+
     pdf.setTextColor(255, 255, 255)
     pdf.setFontSize(22)
     pdf.setFont('helvetica', 'bold')
     pdf.text('MedEvidence AI', m, 12)
-    
+
     pdf.setFontSize(11)
     pdf.setFont('helvetica', 'normal')
     pdf.text('Evidence-Based Medical Research AI', m, 17.5)
@@ -229,32 +231,32 @@ export function downloadAnswerPDF(
 
   // Question Section with styled box
   const [pr, pg, pb] = hexToRgb(BRAND_COLORS.primary)
-  
+
   // Calculate question lines first
   doc.setFontSize(11)
   doc.setFont('helvetica', 'normal')
   const questionLines = doc.splitTextToSize(question, contentWidth - 6)
   const questionBoxHeight = questionLines.length * 6 + 10
-  
+
   checkNewPage(questionBoxHeight + 5)
-  
+
   // Draw question box background
   doc.setFillColor(pr, pg, pb)
   doc.setGState(doc.GState({ opacity: 0.1 }))
   doc.rect(margin, yPos - 2, contentWidth, questionBoxHeight, 'F')
   doc.setGState(doc.GState({ opacity: 1 }))
-  
+
   // Draw question box border
   doc.setDrawColor(pr, pg, pb)
   doc.setLineWidth(0.5)
   doc.rect(margin, yPos - 2, contentWidth, questionBoxHeight, 'S')
-  
+
   // Question label
   doc.setTextColor(pr, pg, pb)
   doc.setFontSize(12)
   doc.setFont('helvetica', 'bold')
   doc.text('CLINICAL QUESTION', margin + 3, yPos + 3)
-  
+
   // Question text
   yPos += 7
   doc.setTextColor(BRAND_COLORS.text)
@@ -274,10 +276,10 @@ export function downloadAnswerPDF(
 
   // Parse and render markdown content
   const blocks = parseMarkdown(answer)
-  
+
   for (const block of blocks) {
     checkNewPage(10)
-    
+
     switch (block.type) {
       case 'h2':
         yPos += 4
@@ -288,14 +290,14 @@ export function downloadAnswerPDF(
         const h2Height = h2Lines.length * 7 + 4
         doc.rect(margin, yPos - 1, contentWidth, h2Height, 'F')
         doc.setGState(doc.GState({ opacity: 1 }))
-        
+
         doc.setTextColor(pr, pg, pb)
         doc.setFontSize(13)
         doc.setFont('helvetica', 'bold')
         doc.text(h2Lines, margin + 2, yPos + 4)
         yPos += h2Height + 3
         break
-        
+
       case 'h3':
         yPos += 3
         checkNewPage(8)
@@ -306,7 +308,7 @@ export function downloadAnswerPDF(
         doc.text(h3Lines, margin + 2, yPos)
         yPos += h3Lines.length * 6 + 3
         break
-        
+
       case 'list':
         checkNewPage(6)
         doc.setTextColor(BRAND_COLORS.text)
@@ -317,7 +319,7 @@ export function downloadAnswerPDF(
         doc.text(listLines, margin + (block.indent || 0) + 3, yPos)
         yPos += Math.max(listLines.length * 5, 5) + 1
         break
-        
+
       case 'text':
         // Handle bold text in content
         let text = block.content
@@ -326,7 +328,7 @@ export function downloadAnswerPDF(
         let match
         let hasBold = boldRegex.test(text)
         boldRegex.lastIndex = 0 // Reset regex
-        
+
         if (hasBold) {
           while ((match = boldRegex.exec(text)) !== null) {
             // Text before bold
@@ -340,7 +342,7 @@ export function downloadAnswerPDF(
               doc.text(beforeLines, margin, yPos)
               yPos += beforeLines.length * 5 + 1
             }
-            
+
             // Bold text
             checkNewPage(6)
             doc.setTextColor(BRAND_COLORS.text)
@@ -349,10 +351,10 @@ export function downloadAnswerPDF(
             const boldLines = doc.splitTextToSize(match[1], contentWidth)
             doc.text(boldLines, margin, yPos)
             yPos += boldLines.length * 5 + 1
-            
+
             lastIndex = match.index + match[0].length
           }
-          
+
           // Remaining text
           if (lastIndex < text.length) {
             const remainingText = text.substring(lastIndex)
@@ -377,7 +379,7 @@ export function downloadAnswerPDF(
         break
     }
   }
-  
+
   yPos += 8
   checkNewPage(20)
 
@@ -388,7 +390,7 @@ export function downloadAnswerPDF(
     doc.setLineWidth(0.3)
     doc.line(margin, yPos, pageWidth - margin, yPos)
     yPos += 6
-    
+
     doc.setTextColor(pr, pg, pb)
     doc.setFontSize(12)
     doc.setFont('helvetica', 'bold')
@@ -407,10 +409,11 @@ export function downloadAnswerPDF(
       const details = `${authorsText}${year}${journal}`
       doc.setFontSize(9)
       const detailsLines = doc.splitTextToSize(details, contentWidth - 10)
-      const citationHeight = titleLines.length * 5.5 + detailsLines.length * 4.5 + (citation.pmid ? 6 : 0) + 8
-      
+      const citationHeight =
+        titleLines.length * 5.5 + detailsLines.length * 4.5 + (citation.pmid ? 6 : 0) + 8
+
       checkNewPage(citationHeight)
-      
+
       // Citation number badge
       doc.setFillColor(pr, pg, pb)
       doc.circle(margin + 3, yPos + 1, 3, 'F')
@@ -418,25 +421,25 @@ export function downloadAnswerPDF(
       doc.setFontSize(8)
       doc.setFont('helvetica', 'bold')
       doc.text(`${index + 1}`, margin + 3, yPos + 2, { align: 'center' })
-      
+
       // Citation content
       const titleX = margin + 10
       const citationWidth = contentWidth - 10
-      
+
       // Title
       doc.setTextColor(BRAND_COLORS.text)
       doc.setFontSize(10)
       doc.setFont('helvetica', 'bold')
       doc.text(titleLines, titleX, yPos + 1)
       yPos += titleLines.length * 5.5 + 1
-      
+
       // Authors and details
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(9)
       doc.setTextColor(BRAND_COLORS.textLight)
       doc.text(detailsLines, titleX, yPos)
       yPos += detailsLines.length * 4.5 + 1
-      
+
       // PubMed link
       if (citation.pmid) {
         doc.setTextColor(pr, pg, pb)
@@ -448,7 +451,7 @@ export function downloadAnswerPDF(
         try {
           const linkWidth = doc.getTextWidth(linkText)
           // Create link annotation - PDF viewers will handle opening in new tab based on their settings
-          doc.link(titleX, yPos - 2.5, linkWidth, 3.5, { 
+          doc.link(titleX, yPos - 2.5, linkWidth, 3.5, {
             url: pubmedUrl,
             // Note: PDF link behavior (new tab) is controlled by PDF viewer settings
             // Most modern PDF viewers (Chrome, Firefox, Adobe Reader) open external links in new tabs by default
@@ -458,7 +461,7 @@ export function downloadAnswerPDF(
         }
         yPos += 5
       }
-      
+
       yPos += 5
     })
   }
@@ -467,16 +470,16 @@ export function downloadAnswerPDF(
   const totalPages = doc.getNumberOfPages()
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i)
-    
+
     // Footer background
     doc.setFillColor(245, 245, 245)
     doc.rect(0, pageHeight - 12, pageWidth, 12, 'F')
-    
+
     // Footer border
     doc.setDrawColor(220, 220, 220)
     doc.setLineWidth(0.3)
     doc.line(0, pageHeight - 12, pageWidth, pageHeight - 12)
-    
+
     doc.setFontSize(8)
     doc.setTextColor(BRAND_COLORS.textLight)
     doc.setFont('helvetica', 'normal')
@@ -484,17 +487,17 @@ export function downloadAnswerPDF(
       `Generated by MedEvidence AI • Page ${i} of ${totalPages}`,
       pageWidth / 2,
       pageHeight - 6,
-      { align: 'center' }
+      { align: 'center' },
     )
     doc.text(
-      new Date().toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'short', 
-        day: 'numeric' 
+      new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
       }),
       pageWidth - margin,
       pageHeight - 6,
-      { align: 'right' }
+      { align: 'right' },
     )
   }
 
@@ -504,7 +507,7 @@ export function downloadAnswerPDF(
 export function downloadSearchResultsPDF(
   query: string,
   papers: Paper[],
-  filename: string = 'medevidence-search-results.pdf'
+  filename: string = 'medevidence-search-results.pdf',
 ) {
   const doc = new jsPDF({
     orientation: 'portrait',
@@ -535,16 +538,16 @@ export function downloadSearchResultsPDF(
     const [r, g, b] = hexToRgb(BRAND_COLORS.primary)
     pdf.setFillColor(r, g, b)
     pdf.rect(0, 0, width, 20, 'F')
-    
+
     const [r2, g2, b2] = hexToRgb(BRAND_COLORS.secondary)
     pdf.setFillColor(r2, g2, b2)
     pdf.rect(0, 0, width, 3, 'F')
-    
+
     pdf.setTextColor(255, 255, 255)
     pdf.setFontSize(22)
     pdf.setFont('helvetica', 'bold')
     pdf.text('MedEvidence AI', m, 12)
-    
+
     pdf.setFontSize(11)
     pdf.setFont('helvetica', 'normal')
     pdf.text('Medical Literature Search Results', m, 17.5)
@@ -556,30 +559,30 @@ export function downloadSearchResultsPDF(
 
   // Search Query Section with styled box
   const [pr, pg, pb] = hexToRgb(BRAND_COLORS.primary)
-  
+
   // Calculate query lines first
   doc.setFontSize(10.5)
   doc.setFont('helvetica', 'normal')
   const queryLines = doc.splitTextToSize(query, contentWidth - 6)
   const queryBoxHeight = queryLines.length * 5 + 8
-  
+
   // Draw query box background
   doc.setFillColor(pr, pg, pb)
   doc.setGState(doc.GState({ opacity: 0.1 }))
   doc.rect(margin, yPos - 2, contentWidth, queryBoxHeight, 'F')
   doc.setGState(doc.GState({ opacity: 1 }))
-  
+
   // Draw query box border
   doc.setDrawColor(pr, pg, pb)
   doc.setLineWidth(0.5)
   doc.rect(margin, yPos - 2, contentWidth, queryBoxHeight, 'S')
-  
+
   // Query label
   doc.setTextColor(pr, pg, pb)
   doc.setFontSize(11)
   doc.setFont('helvetica', 'bold')
   doc.text('SEARCH QUERY', margin + 3, yPos + 2)
-  
+
   // Query text
   yPos += 6
   doc.setTextColor(BRAND_COLORS.text)
@@ -600,7 +603,7 @@ export function downloadSearchResultsPDF(
   // Papers List
   papers.forEach((paper, index) => {
     const paperStartY = yPos
-    
+
     // Calculate paper height first
     doc.setFontSize(11)
     const titleLines = doc.splitTextToSize(paper.title, contentWidth - 12)
@@ -617,21 +620,23 @@ export function downloadSearchResultsPDF(
     const metadata = `${authorsText}${year}${journal}`
     doc.setFontSize(8.5)
     const metadataLines = doc.splitTextToSize(metadata, contentWidth - 12)
-    
-    const paperHeight = titleLines.length * 6 + 
-                       displayAbstractLines.length * 4.5 + 
-                       (abstractLines.length > maxAbstractLines ? 3 : 0) +
-                       metadataLines.length * 4.5 + 
-                       (paper.pmid ? 7 : 0) + 8
-    
+
+    const paperHeight =
+      titleLines.length * 6 +
+      displayAbstractLines.length * 4.5 +
+      (abstractLines.length > maxAbstractLines ? 3 : 0) +
+      metadataLines.length * 4.5 +
+      (paper.pmid ? 7 : 0) +
+      8
+
     checkNewPage(paperHeight + 5)
-    
+
     // Paper container with subtle background
     doc.setFillColor(250, 250, 250)
     doc.setGState(doc.GState({ opacity: 0.3 }))
     doc.rect(margin, paperStartY - 2, contentWidth, paperHeight, 'F')
     doc.setGState(doc.GState({ opacity: 1 }))
-    
+
     // Paper number badge
     doc.setFillColor(pr, pg, pb)
     doc.circle(margin + 5, yPos + 1, 4, 'F')
@@ -639,7 +644,7 @@ export function downloadSearchResultsPDF(
     doc.setFontSize(8)
     doc.setFont('helvetica', 'bold')
     doc.text(`${index + 1}`, margin + 5, yPos + 2, { align: 'center' })
-    
+
     // Paper title
     const titleX = margin + 12
     const paperContentWidth = contentWidth - 12
@@ -648,14 +653,14 @@ export function downloadSearchResultsPDF(
     doc.setFont('helvetica', 'bold')
     doc.text(titleLines, titleX, yPos + 1)
     yPos += titleLines.length * 6 + 2
-    
+
     // Abstract with better formatting
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(9)
     doc.setTextColor(BRAND_COLORS.textLight)
     doc.text(displayAbstractLines, titleX, yPos)
     yPos += displayAbstractLines.length * 4.5
-    
+
     if (abstractLines.length > maxAbstractLines) {
       doc.setFontSize(8)
       doc.setTextColor(BRAND_COLORS.textLight)
@@ -663,21 +668,21 @@ export function downloadSearchResultsPDF(
       doc.text('... (abstract truncated)', titleX, yPos)
       yPos += 3
     }
-    
+
     // Metadata in a compact format
     doc.setFontSize(8.5)
     doc.setFont('helvetica', 'normal')
     doc.setTextColor(BRAND_COLORS.textLight)
     doc.text(metadataLines, titleX, yPos)
     yPos += metadataLines.length * 4.5 + 1
-    
+
     // PubMed link with better styling
     if (paper.pmid) {
       doc.setFillColor(pr, pg, pb)
       doc.setGState(doc.GState({ opacity: 0.1 }))
       doc.rect(titleX, yPos - 1, paperContentWidth, 5, 'F')
       doc.setGState(doc.GState({ opacity: 1 }))
-      
+
       doc.setTextColor(pr, pg, pb)
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(8)
@@ -687,7 +692,7 @@ export function downloadSearchResultsPDF(
       try {
         const linkWidth = doc.getTextWidth(linkText)
         // Create link annotation - PDF viewers will handle opening in new tab based on their settings
-        doc.link(titleX, yPos - 1, linkWidth + 4, 5, { 
+        doc.link(titleX, yPos - 1, linkWidth + 4, 5, {
           url: pubmedUrl,
           // Note: PDF link behavior (new tab) is controlled by PDF viewer settings
           // Most modern PDF viewers (Chrome, Firefox, Adobe Reader) open external links in new tabs by default
@@ -697,9 +702,9 @@ export function downloadSearchResultsPDF(
       }
       yPos += 6
     }
-    
+
     yPos += 4
-    
+
     // Add separator line between papers
     if (index < papers.length - 1) {
       doc.setDrawColor(220, 220, 220)
@@ -713,16 +718,16 @@ export function downloadSearchResultsPDF(
   const totalPages = doc.getNumberOfPages()
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i)
-    
+
     // Footer background
     doc.setFillColor(245, 245, 245)
     doc.rect(0, pageHeight - 12, pageWidth, 12, 'F')
-    
+
     // Footer border
     doc.setDrawColor(220, 220, 220)
     doc.setLineWidth(0.3)
     doc.line(0, pageHeight - 12, pageWidth, pageHeight - 12)
-    
+
     doc.setFontSize(8)
     doc.setTextColor(BRAND_COLORS.textLight)
     doc.setFont('helvetica', 'normal')
@@ -730,20 +735,19 @@ export function downloadSearchResultsPDF(
       `Generated by MedEvidence AI • Page ${i} of ${totalPages}`,
       pageWidth / 2,
       pageHeight - 6,
-      { align: 'center' }
+      { align: 'center' },
     )
     doc.text(
-      new Date().toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'short', 
-        day: 'numeric' 
+      new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
       }),
       pageWidth - margin,
       pageHeight - 6,
-      { align: 'right' }
+      { align: 'right' },
     )
   }
 
   doc.save(filename)
 }
-

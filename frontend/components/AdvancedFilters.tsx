@@ -33,18 +33,22 @@ const STUDY_TYPES = [
 const SORT_OPTIONS = [
   { value: 'relevance', label: 'Most Relevant' },
   { value: 'date', label: 'Newest First' },
-  { value: 'citations', label: 'Most Cited' }
+  { value: 'citations', label: 'Most Cited' },
 ]
 
-export default function AdvancedFilters({ filters, onFiltersChange, onReset }: AdvancedFiltersProps) {
+export default function AdvancedFilters({
+  filters,
+  onFiltersChange,
+  onReset,
+}: AdvancedFiltersProps) {
   const [isOpen, setIsOpen] = useState(false)
   const currentYear = new Date().getFullYear()
 
-  const hasActiveFilters = 
-    filters.year_from || 
-    filters.year_to || 
-    filters.journal || 
-    filters.study_type || 
+  const hasActiveFilters =
+    filters.year_from ||
+    filters.year_to ||
+    filters.journal ||
+    filters.study_type ||
     filters.author ||
     filters.sort_by !== 'relevance'
 
@@ -53,7 +57,7 @@ export default function AdvancedFilters({ filters, onFiltersChange, onReset }: A
     filters.journal,
     filters.study_type,
     filters.author,
-    filters.sort_by !== 'relevance'
+    filters.sort_by !== 'relevance',
   ].filter(Boolean).length
 
   const updateFilter = (key: keyof SearchFilters, value: any) => {
@@ -72,7 +76,9 @@ export default function AdvancedFilters({ filters, onFiltersChange, onReset }: A
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
         >
-          <Filter className={`w-4 h-4 ${hasActiveFilters ? 'text-emerald-600 dark:text-emerald-400' : ''}`} />
+          <Filter
+            className={`w-4 h-4 ${hasActiveFilters ? 'text-emerald-600 dark:text-emerald-400' : ''}`}
+          />
           <span className="text-sm font-medium">Filters</span>
           {hasActiveFilters && (
             <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-semibold rounded-full">
@@ -108,7 +114,9 @@ export default function AdvancedFilters({ filters, onFiltersChange, onReset }: A
                   min="1900"
                   max={currentYear}
                   value={filters.year_from || ''}
-                  onChange={(e) => updateFilter('year_from', e.target.value ? parseInt(e.target.value) : undefined)}
+                  onChange={(e) =>
+                    updateFilter('year_from', e.target.value ? parseInt(e.target.value) : undefined)
+                  }
                   placeholder="From"
                   className="flex-1 px-2.5 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 />
@@ -118,7 +126,9 @@ export default function AdvancedFilters({ filters, onFiltersChange, onReset }: A
                   min="1900"
                   max={currentYear}
                   value={filters.year_to || ''}
-                  onChange={(e) => updateFilter('year_to', e.target.value ? parseInt(e.target.value) : undefined)}
+                  onChange={(e) =>
+                    updateFilter('year_to', e.target.value ? parseInt(e.target.value) : undefined)
+                  }
                   placeholder="To"
                   className="flex-1 px-2.5 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 />
@@ -237,8 +247,17 @@ export default function AdvancedFilters({ filters, onFiltersChange, onReset }: A
               <div className="flex flex-wrap gap-2">
                 {filters.year_from && (
                   <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 rounded-lg text-xs">
-                    <span>Year: {filters.year_from}{filters.year_to ? `-${filters.year_to}` : '+'}</span>
-                    <button onClick={() => { clearFilter('year_from'); clearFilter('year_to') }} className="hover:text-emerald-900 dark:hover:text-emerald-100">
+                    <span>
+                      Year: {filters.year_from}
+                      {filters.year_to ? `-${filters.year_to}` : '+'}
+                    </span>
+                    <button
+                      onClick={() => {
+                        clearFilter('year_from')
+                        clearFilter('year_to')
+                      }}
+                      className="hover:text-emerald-900 dark:hover:text-emerald-100"
+                    >
                       <X className="w-3 h-3" />
                     </button>
                   </span>
@@ -246,7 +265,10 @@ export default function AdvancedFilters({ filters, onFiltersChange, onReset }: A
                 {filters.journal && (
                   <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 rounded-lg text-xs">
                     <span>Journal: {filters.journal}</span>
-                    <button onClick={() => clearFilter('journal')} className="hover:text-emerald-900 dark:hover:text-emerald-100">
+                    <button
+                      onClick={() => clearFilter('journal')}
+                      className="hover:text-emerald-900 dark:hover:text-emerald-100"
+                    >
                       <X className="w-3 h-3" />
                     </button>
                   </span>
@@ -254,7 +276,10 @@ export default function AdvancedFilters({ filters, onFiltersChange, onReset }: A
                 {filters.study_type && (
                   <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 rounded-lg text-xs">
                     <span>Type: {filters.study_type}</span>
-                    <button onClick={() => clearFilter('study_type')} className="hover:text-emerald-900 dark:hover:text-emerald-100">
+                    <button
+                      onClick={() => clearFilter('study_type')}
+                      className="hover:text-emerald-900 dark:hover:text-emerald-100"
+                    >
                       <X className="w-3 h-3" />
                     </button>
                   </span>
@@ -262,15 +287,23 @@ export default function AdvancedFilters({ filters, onFiltersChange, onReset }: A
                 {filters.author && (
                   <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 rounded-lg text-xs">
                     <span>Author: {filters.author}</span>
-                    <button onClick={() => clearFilter('author')} className="hover:text-emerald-900 dark:hover:text-emerald-100">
+                    <button
+                      onClick={() => clearFilter('author')}
+                      className="hover:text-emerald-900 dark:hover:text-emerald-100"
+                    >
                       <X className="w-3 h-3" />
                     </button>
                   </span>
                 )}
                 {filters.sort_by && filters.sort_by !== 'relevance' && (
                   <span className="inline-flex items-center space-x-1 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 rounded-lg text-xs">
-                    <span>Sort: {SORT_OPTIONS.find(o => o.value === filters.sort_by)?.label}</span>
-                    <button onClick={() => updateFilter('sort_by', 'relevance')} className="hover:text-emerald-900 dark:hover:text-emerald-100">
+                    <span>
+                      Sort: {SORT_OPTIONS.find((o) => o.value === filters.sort_by)?.label}
+                    </span>
+                    <button
+                      onClick={() => updateFilter('sort_by', 'relevance')}
+                      className="hover:text-emerald-900 dark:hover:text-emerald-100"
+                    >
                       <X className="w-3 h-3" />
                     </button>
                   </span>

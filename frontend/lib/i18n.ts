@@ -26,7 +26,7 @@ export const SUPPORTED_LANGUAGES = {
 export type LanguageCode = keyof typeof SUPPORTED_LANGUAGES
 
 // Translation keys - we'll use a simple object-based approach
-export type TranslationKey = 
+export type TranslationKey =
   | 'common.search'
   | 'common.searchPlaceholder'
   | 'common.askQuestion'
@@ -201,21 +201,21 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     'common.profile': 'Profil',
     'common.logout': 'Déconnexion',
     'common.login': 'Connexion',
-    'common.signup': 'S\'inscrire',
+    'common.signup': "S'inscrire",
     'search.foundPapers': '{count} article(s) trouvé(s)',
     'search.sortedBy': 'Trié par',
     'search.relevance': 'pertinence',
     'search.date': 'date',
     'search.downloadPDF': 'Télécharger PDF',
     'search.trySearching': 'Essayez de rechercher:',
-    'search.exampleQueries': 'Requêtes d\'exemple',
+    'search.exampleQueries': "Requêtes d'exemple",
     'query.askQuestion': 'Poser une Question Clinique',
     'query.placeholder': 'Posez une question clinique...',
-    'query.exampleQuestions': 'Questions d\'Exemple',
+    'query.exampleQuestions': "Questions d'Exemple",
     'query.loading': 'Traitement de votre question...',
     'query.error': 'Échec du traitement de la question',
     'query.noAnswer': 'Aucune réponse disponible',
-    'dashboard.overview': 'Vue d\'ensemble',
+    'dashboard.overview': "Vue d'ensemble",
     'dashboard.queries': 'Requêtes Enregistrées',
     'dashboard.bookmarks': 'Marqueurs',
     'dashboard.lists': 'Listes de Lecture',
@@ -311,7 +311,7 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     'query.placeholder': 'Fai una domanda clinica...',
     'query.exampleQuestions': 'Domande di Esempio',
     'query.loading': 'Elaborazione della tua domanda...',
-    'query.error': 'Errore nell\'elaborazione della domanda',
+    'query.error': "Errore nell'elaborazione della domanda",
     'query.noAnswer': 'Nessuna risposta disponibile',
     'dashboard.overview': 'Panoramica',
     'dashboard.queries': 'Query Salvate',
@@ -771,7 +771,7 @@ const translations: Record<LanguageCode, Record<string, string>> = {
     'common.loading': 'Yükleniyor...',
     'common.error': 'Hata',
     'common.noResults': 'Sonuç bulunamadı',
-    'common.viewOnPubMed': 'PubMed\'de Görüntüle',
+    'common.viewOnPubMed': "PubMed'de Görüntüle",
     'common.bookmark': 'Yer İşareti',
     'common.removeBookmark': 'Yer işaretini kaldır',
     'common.addToList': 'Okuma Listesine Ekle',
@@ -993,13 +993,13 @@ export function getLanguage(): LanguageCode {
 export function t(key: TranslationKey, params?: Record<string, string | number>): string {
   const lang = getLanguage()
   const translation = translations[lang]?.[key] || translations.en[key] || key
-  
+
   if (params) {
     return translation.replace(/\{(\w+)\}/g, (match, paramKey) => {
       return params[paramKey]?.toString() || match
     })
   }
-  
+
   return translation
 }
 
@@ -1007,8 +1007,3 @@ export function t(key: TranslationKey, params?: Record<string, string | number>)
 if (typeof window !== 'undefined') {
   getLanguage()
 }
-
-
-
-
-

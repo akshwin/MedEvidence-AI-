@@ -22,7 +22,7 @@ export default function ConfirmDialog({
   cancelText = 'Cancel',
   onConfirm,
   onCancel,
-  type = 'danger'
+  type = 'danger',
 }: ConfirmDialogProps) {
   useEffect(() => {
     if (isOpen) {
@@ -51,18 +51,18 @@ export default function ConfirmDialog({
     danger: {
       icon: 'text-red-600 dark:text-red-400',
       iconBg: 'bg-red-100 dark:bg-red-900/30',
-      confirmButton: 'bg-red-600 hover:bg-red-700 text-white'
+      confirmButton: 'bg-red-600 hover:bg-red-700 text-white',
     },
     warning: {
       icon: 'text-yellow-600 dark:text-yellow-400',
       iconBg: 'bg-yellow-100 dark:bg-yellow-900/30',
-      confirmButton: 'bg-yellow-600 hover:bg-yellow-700 text-white'
+      confirmButton: 'bg-yellow-600 hover:bg-yellow-700 text-white',
     },
     info: {
       icon: 'text-blue-600 dark:text-blue-400',
       iconBg: 'bg-blue-100 dark:bg-blue-900/30',
-      confirmButton: 'bg-blue-600 hover:bg-blue-700 text-white'
-    }
+      confirmButton: 'bg-blue-600 hover:bg-blue-700 text-white',
+    },
   }
 
   const styles = typeStyles[type]
@@ -74,7 +74,7 @@ export default function ConfirmDialog({
         className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 animate-in fade-in duration-200"
         onClick={onCancel}
       />
-      
+
       {/* Dialog */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
         <div
@@ -84,13 +84,13 @@ export default function ConfirmDialog({
           {/* Header */}
           <div className="flex items-start justify-between p-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center space-x-4">
-              <div className={`w-12 h-12 ${styles.iconBg} rounded-full flex items-center justify-center flex-shrink-0`}>
+              <div
+                className={`w-12 h-12 ${styles.iconBg} rounded-full flex items-center justify-center flex-shrink-0`}
+              >
                 <AlertTriangle className={`w-6 h-6 ${styles.icon}`} />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                  {title}
-                </h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{title}</h3>
               </div>
             </div>
             <button
@@ -104,9 +104,7 @@ export default function ConfirmDialog({
 
           {/* Content */}
           <div className="p-6">
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
-              {message}
-            </p>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">{message}</p>
 
             {/* Actions */}
             <div className="flex items-center justify-end space-x-3">
@@ -129,9 +127,3 @@ export default function ConfirmDialog({
     </>
   )
 }
-
-
-
-
-
-

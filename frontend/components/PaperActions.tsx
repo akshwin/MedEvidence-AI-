@@ -1,7 +1,19 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Bookmark, BookmarkCheck, BookOpen, FileText, Plus, X, Loader2, Check, GitCompare, Highlighter, Sparkles } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import {
+  Bookmark,
+  BookmarkCheck,
+  BookOpen,
+  FileText,
+  Plus,
+  X,
+  Loader2,
+  Check,
+  GitCompare,
+  Highlighter,
+  Sparkles,
+} from 'lucide-react'
 import { dashboardApi, Paper, PaperAnnotation } from '@/lib/api'
 import { useAuth } from '@/lib/auth-context'
 import { useToast } from '@/lib/toast-context'
@@ -9,18 +21,24 @@ import PaperAnnotationEditor from './PaperAnnotationEditor'
 import PaperAnalysisPanel from './PaperAnalysisPanel'
 
 interface PaperActionsProps {
-  paper: Paper | {
-    pmid: string
-    title: string
-    authors?: string[]
-    year?: number
-    journal?: string
-  }
+  paper:
+    | Paper
+    | {
+        pmid: string
+        title: string
+        authors?: string[]
+        year?: number
+        journal?: string
+      }
   onBookmarkChange?: () => void
   showLabels?: boolean
 }
 
-export default function PaperActions({ paper, onBookmarkChange, showLabels = false }: PaperActionsProps) {
+export default function PaperActions({
+  paper,
+  onBookmarkChange,
+  showLabels = false,
+}: PaperActionsProps) {
   const { isAuthenticated } = useAuth()
   const { showToast } = useToast()
   const [isBookmarked, setIsBookmarked] = useState(false)
@@ -39,13 +57,7 @@ export default function PaperActions({ paper, onBookmarkChange, showLabels = fal
   const [showAnalysisPanel, setShowAnalysisPanel] = useState(false)
   const [annotations, setAnnotations] = useState<PaperAnnotation[]>([])
 
-  useEffect(() => {
-    if (isAuthenticated && paper.pmid && showAnnotationEditor) {
-      loadAnnotations()
-    }
-  }, [isAuthenticated, paper.pmid, showAnnotationEditor])
-
-  const loadAnnotations = async () => {
+  const loadAnnotations = useCallback(async () => {
     if (!paper.pmid) {
       console.error('Paper PMID is missing')
       return
@@ -57,16 +69,15 @@ export default function PaperActions({ paper, onBookmarkChange, showLabels = fal
       console.error('Error loading annotations:', error)
       setAnnotations([])
     }
-  }
+  }, [paper.pmid])
 
-  // Check if paper is bookmarked
   useEffect(() => {
-    if (isAuthenticated && paper.pmid) {
-      checkBookmarkStatus()
+    if (isAuthenticated && paper.pmid && showAnnotationEditor) {
+      loadAnnotations()
     }
-  }, [isAuthenticated, paper.pmid])
+  }, [isAuthenticated, paper.pmid, showAnnotationEditor, loadAnnotations])
 
-  const checkBookmarkStatus = async () => {
+  const checkBookmarkStatus = useCallback(async () => {
     if (!isAuthenticated) return
     setCheckingBookmark(true)
     try {
@@ -78,7 +89,14 @@ export default function PaperActions({ paper, onBookmarkChange, showLabels = fal
     } finally {
       setCheckingBookmark(false)
     }
-  }
+  }, [isAuthenticated, paper.pmid])
+
+  // Check if paper is bookmarked
+  useEffect(() => {
+    if (isAuthenticated && paper.pmid) {
+      checkBookmarkStatus()
+    }
+  }, [isAuthenticated, paper.pmid, checkBookmarkStatus])
 
   const handleBookmark = async () => {
     if (!isAuthenticated) {
@@ -101,7 +119,7 @@ export default function PaperActions({ paper, onBookmarkChange, showLabels = fal
           paper_title: paper.title,
           paper_authors: paper.authors,
           paper_year: paper.year,
-          paper_journal: paper.journal
+          paper_journal: paper.journal,
         })
         setIsBookmarked(true)
         setBookmarkId(bookmark.id)
@@ -111,7 +129,10 @@ export default function PaperActions({ paper, onBookmarkChange, showLabels = fal
         onBookmarkChange()
       }
     } catch (error: any) {
-      if (error.response?.status === 400 && error.response?.data?.detail?.includes('already bookmarked')) {
+      if (
+        error.response?.status === 400 &&
+        error.response?.data?.detail?.includes('already bookmarked')
+      ) {
         // Already bookmarked, just update state
         await checkBookmarkStatus()
         showToast('Paper is already bookmarked', 'info')
@@ -158,7 +179,7 @@ export default function PaperActions({ paper, onBookmarkChange, showLabels = fal
         paper_title: paper.title,
         paper_authors: paper.authors,
         paper_year: paper.year,
-        paper_journal: paper.journal
+        paper_journal: paper.journal,
       })
       showToast('Paper added to reading list!', 'success')
       setShowReadingListModal(false)
@@ -192,7 +213,7 @@ export default function PaperActions({ paper, onBookmarkChange, showLabels = fal
         paper_id: paper.pmid,
         paper_title: paper.title,
         title: noteTitle.trim() || undefined,
-        content: noteContent.trim()
+        content: noteContent.trim(),
       })
       showToast('Note created!', 'success')
       setShowNoteModal(false)
@@ -294,7 +315,7 @@ export default function PaperActions({ paper, onBookmarkChange, showLabels = fal
 
       {/* Annotation Editor Modal */}
       {showAnnotationEditor && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4 overflow-auto"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
@@ -302,7 +323,7 @@ export default function PaperActions({ paper, onBookmarkChange, showLabels = fal
             }
           }}
         >
-          <div 
+          <div
             className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-4xl w-full my-8 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
@@ -320,7 +341,7 @@ export default function PaperActions({ paper, onBookmarkChange, showLabels = fal
 
       {/* Analysis Panel Modal */}
       {showAnalysisPanel && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999] p-4 overflow-auto"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
@@ -328,24 +349,29 @@ export default function PaperActions({ paper, onBookmarkChange, showLabels = fal
             }
           }}
         >
-          <div 
+          <div
             className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-4xl w-full my-8 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <PaperAnalysisPanel
-              paper={paper}
-              onClose={() => setShowAnalysisPanel(false)}
-            />
+            <PaperAnalysisPanel paper={paper} onClose={() => setShowAnalysisPanel(false)} />
           </div>
         </div>
       )}
 
       {/* Reading List Modal */}
       {showReadingListModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowReadingListModal(false)}>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowReadingListModal(false)}
+        >
+          <div
+            className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Add to Reading List</h3>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Add to Reading List
+              </h3>
               <button
                 onClick={() => setShowReadingListModal(false)}
                 className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
@@ -355,7 +381,9 @@ export default function PaperActions({ paper, onBookmarkChange, showLabels = fal
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Reading List</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Select Reading List
+                </label>
                 <select
                   value={selectedListId}
                   onChange={(e) => setSelectedListId(e.target.value)}
@@ -401,8 +429,14 @@ export default function PaperActions({ paper, onBookmarkChange, showLabels = fal
 
       {/* Note Modal */}
       {showNoteModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowNoteModal(false)}>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowNoteModal(false)}
+        >
+          <div
+            className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Add Note</h3>
               <button
@@ -414,13 +448,17 @@ export default function PaperActions({ paper, onBookmarkChange, showLabels = fal
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Paper</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Paper
+                </label>
                 <p className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 p-2 rounded border border-gray-200 dark:border-gray-600 line-clamp-2">
                   {paper.title}
                 </p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Note Title (Optional)</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Note Title (Optional)
+                </label>
                 <input
                   type="text"
                   value={noteTitle}
@@ -430,7 +468,9 @@ export default function PaperActions({ paper, onBookmarkChange, showLabels = fal
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Note Content *</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Note Content *
+                </label>
                 <textarea
                   value={noteContent}
                   onChange={(e) => setNoteContent(e.target.value)}
@@ -475,4 +515,3 @@ export default function PaperActions({ paper, onBookmarkChange, showLabels = fal
     </>
   )
 }
-

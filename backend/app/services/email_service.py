@@ -2,79 +2,75 @@
 Email service for sending verification and password reset emails
 """
 
+import logging
+import re
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Optional
 from app.core.config import settings
 
+logger = logging.getLogger(__name__)
+
 
 class EmailService:
     """Service for sending emails"""
-    
+
     def __init__(self):
         self.smtp_server = settings.smtp_server
         self.smtp_port = settings.smtp_port
         self.smtp_username = settings.smtp_username
         self.smtp_password = settings.smtp_password
         self.frontend_url = settings.frontend_url
-    
+
     def _send_email(
-        self,
-        to_email: str,
-        subject: str,
-        html_body: str,
-        text_body: Optional[str] = None
+        self, to_email: str, subject: str, html_body: str, text_body: Optional[str] = None
     ) -> bool:
         """Send an email"""
         if not self.smtp_server or not self.smtp_username or not self.smtp_password:
-            print("\n" + "="*80)
-            print(f"[Email Service] Email not configured. Would send to {to_email}")
-            print(f"[Email Service] Subject: {subject}")
-            print("="*80)
-            print(f"[Email Service] HTML Body:\n{html_body}")
-            print("="*80 + "\n")
-            # Extract verification/reset URL from HTML for easy access
-            import re
+            # Log the verification/reset link so local dev works without SMTP
             url_match = re.search(r'href="([^"]+)"', html_body)
-            if url_match:
-                print(f"[Email Service] Verification/Reset URL: {url_match.group(1)}")
-                print("="*80 + "\n")
+            logger.warning(
+                f"Email not configured. Would send '{subject}' to {to_email}"
+                + (f" (link: {url_match.group(1)})" if url_match else "")
+            )
             return False
-        
+
         try:
             # Create message
-            msg = MIMEMultipart('alternative')
-            msg['Subject'] = subject
-            msg['From'] = self.smtp_username
-            msg['To'] = to_email
-            
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = subject
+            msg["From"] = self.smtp_username
+            msg["To"] = to_email
+
             # Add text and HTML parts
             if text_body:
-                part1 = MIMEText(text_body, 'plain')
+                part1 = MIMEText(text_body, "plain")
                 msg.attach(part1)
-            
-            part2 = MIMEText(html_body, 'html')
+
+            part2 = MIMEText(html_body, "html")
             msg.attach(part2)
-            
+
             # Send email
             with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
                 server.starttls()
                 server.login(self.smtp_username, self.smtp_password)
                 server.send_message(msg)
-            
+
             return True
         except Exception as e:
-            print(f"[Email Service] Error sending email: {e}")
+            logger.error(f"Error sending email: {e}")
             return False
-    
-    def send_verification_email(self, email: str, token: str, full_name: Optional[str] = None) -> bool:
+
+    def send_verification_email(
+        self, email: str, token: str, full_name: Optional[str] = None
+    ) -> bool:
         """Send email verification email"""
         verification_url = f"{self.frontend_url}/verify-email?token={token}"
-        
+
         name = full_name or "User"
         subject = "Verify your MedEvidence AI account"
-        
+
         html_body = f"""
         <html>
           <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
@@ -101,7 +97,7 @@ class EmailService:
           </body>
         </html>
         """
-        
+
         text_body = f"""
         Welcome to MedEvidence AI!
         
@@ -116,16 +112,18 @@ class EmailService:
         
         MedEvidence AI - Evidence-Based Medical Research Platform
         """
-        
+
         return self._send_email(email, subject, html_body, text_body)
-    
-    def send_password_reset_email(self, email: str, token: str, full_name: Optional[str] = None) -> bool:
+
+    def send_password_reset_email(
+        self, email: str, token: str, full_name: Optional[str] = None
+    ) -> bool:
         """Send password reset email"""
         reset_url = f"{self.frontend_url}/reset-password?token={token}"
-        
+
         name = full_name or "User"
         subject = "Reset your MedEvidence AI password"
-        
+
         html_body = f"""
         <html>
           <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
@@ -152,7 +150,7 @@ class EmailService:
           </body>
         </html>
         """
-        
+
         text_body = f"""
         Password Reset Request
         
@@ -167,10 +165,9 @@ class EmailService:
         
         MedEvidence AI - Evidence-Based Medical Research Platform
         """
-        
+
         return self._send_email(email, subject, html_body, text_body)
 
 
 # Singleton instance
 email_service = EmailService()
-

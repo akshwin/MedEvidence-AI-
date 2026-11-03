@@ -1,9 +1,24 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Send, Loader2, Brain, Zap, TrendingUp, Download, History as HistoryIcon, BookmarkPlus } from 'lucide-react'
+import {
+  Send,
+  Loader2,
+  Brain,
+  Zap,
+  TrendingUp,
+  Download,
+  History as HistoryIcon,
+  BookmarkPlus,
+} from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { queryResearch, QueryResponse, conversationsApi, MessageData, dashboardApi } from '@/lib/api'
+import {
+  queryResearch,
+  QueryResponse,
+  conversationsApi,
+  MessageData,
+  dashboardApi,
+} from '@/lib/api'
 import Message from './Message'
 import { downloadAnswerPDF } from '@/lib/pdf-utils'
 import { ChatLoadingSkeleton } from './LoadingSkeleton'
@@ -11,11 +26,13 @@ import { useToast } from '@/lib/toast-context'
 import { useAuth } from '@/lib/auth-context'
 
 export default function Chat() {
-  const [messages, setMessages] = useState<Array<{
-    role: 'user' | 'assistant'
-    content: string
-    citations?: QueryResponse['citations']
-  }>>([])
+  const [messages, setMessages] = useState<
+    Array<{
+      role: 'user' | 'assistant'
+      content: string
+      citations?: QueryResponse['citations']
+    }>
+  >([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [savingQuery, setSavingQuery] = useState(false)
@@ -53,7 +70,7 @@ export default function Chat() {
         citations: response.citations,
       }
       setMessages((prev) => [...prev, assistantMessage])
-      
+
       // Save conversation if authenticated
       if (isAuthenticated) {
         try {
@@ -64,22 +81,22 @@ export default function Chat() {
               role: 'assistant',
               content: response.answer,
               citations: response.citations,
-            }
+            },
           ]
-          
+
           // Create new conversation (each Q&A pair is a new conversation for simplicity)
           // In production, you might want to append messages to existing conversation
           const conversation = await conversationsApi.create({
-            messages: allMessages
+            messages: allMessages,
           })
           setCurrentConversationId(conversation.id)
-          
+
           // Auto-save query
           try {
             await dashboardApi.saveQuery({
               query_text: userMessage,
               query_type: 'chat',
-              results_count: response.citations?.length
+              results_count: response.citations?.length,
             })
           } catch (queryError) {
             // Silently fail - saving query is optional
@@ -99,7 +116,8 @@ export default function Chat() {
         ...prev,
         {
           role: 'assistant',
-          content: 'Sorry, I encountered an error processing your question. Please try again or check your connection.',
+          content:
+            'Sorry, I encountered an error processing your question. Please try again or check your connection.',
         },
       ])
     } finally {
@@ -119,7 +137,7 @@ export default function Chat() {
     // Find last user message and last assistant message
     let lastUserMessage = null
     let lastAssistantMessage = null
-    
+
     for (let i = messages.length - 1; i >= 0; i--) {
       if (!lastUserMessage && messages[i].role === 'user') {
         lastUserMessage = messages[i]
@@ -129,44 +147,50 @@ export default function Chat() {
       }
       if (lastUserMessage && lastAssistantMessage) break
     }
-    
+
     if (lastUserMessage && lastAssistantMessage) {
       const question = lastUserMessage.content
       const answer = lastAssistantMessage.content
       const citations = lastAssistantMessage.citations || []
-      
-      const filename = `medevidence-${question.substring(0, 30).replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${Date.now()}.pdf`
+
+      const filename = `medevidence-${question
+        .substring(0, 30)
+        .replace(/[^a-z0-9]/gi, '-')
+        .toLowerCase()}-${Date.now()}.pdf`
       downloadAnswerPDF(question, answer, citations, filename)
     }
   }
 
   const exampleQuestions = [
     {
-      icon: "💊",
-      text: "Latest diabetes treatments",
-      query: "What are the latest treatments for diabetes?"
+      icon: '💊',
+      text: 'Latest diabetes treatments',
+      query: 'What are the latest treatments for diabetes?',
     },
     {
-      icon: "❤️",
-      text: "Exercise and heart health",
-      query: "How does exercise affect cardiovascular health?"
+      icon: '❤️',
+      text: 'Exercise and heart health',
+      query: 'How does exercise affect cardiovascular health?',
     },
     {
-      icon: "💉",
-      text: "Statin side effects",
-      query: "What are the side effects of statins?"
+      icon: '💉',
+      text: 'Statin side effects',
+      query: 'What are the side effects of statins?',
     },
     {
-      icon: "🔬",
-      text: "Cancer immunotherapy",
-      query: "Recent advances in cancer immunotherapy"
-    }
+      icon: '🔬',
+      text: 'Cancer immunotherapy',
+      query: 'Recent advances in cancer immunotherapy',
+    },
   ]
 
   return (
     <div className="flex flex-col h-[650px] bg-gradient-to-b from-gray-50 via-white to-white dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-inner">
       {/* Messages */}
-      <div ref={messagesContainerRef} className={`flex-1 p-6 lg:p-8 space-y-6 min-h-0 ${messages.length === 0 ? 'overflow-y-visible' : 'overflow-y-auto chat-scrollbar'}`}>
+      <div
+        ref={messagesContainerRef}
+        className={`flex-1 p-6 lg:p-8 space-y-6 min-h-0 ${messages.length === 0 ? 'overflow-y-visible' : 'overflow-y-auto chat-scrollbar'}`}
+      >
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center py-4">
             <div className="relative mb-6 pt-4">
@@ -194,7 +218,9 @@ export default function Chat() {
                       <div className="font-semibold text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                         {example.text}
                       </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Click to try</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                        Click to try
+                      </div>
                     </div>
                     <Zap className="w-4 h-4 text-emerald-500 dark:text-emerald-400 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
@@ -219,7 +245,7 @@ export default function Chat() {
                         try {
                           await dashboardApi.saveQuery({
                             query_text: lastUserQuery,
-                            query_type: 'chat'
+                            query_type: 'chat',
                           })
                           showToast('Query saved to dashboard!', 'success')
                         } catch (error: any) {
@@ -250,7 +276,7 @@ export default function Chat() {
                     </button>
                   )}
                 </div>
-                {messages.some(m => m.role === 'assistant' && m.citations) && (
+                {messages.some((m) => m.role === 'assistant' && m.citations) && (
                   <button
                     onClick={handleDownloadPDF}
                     className="inline-flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg hover:from-emerald-700 hover:to-teal-700 transition-all font-medium text-sm shadow-lg hover:shadow-xl ml-auto"
@@ -278,8 +304,12 @@ export default function Chat() {
                   <div className="flex items-center space-x-3">
                     <Loader2 className="w-5 h-5 animate-spin text-emerald-600 dark:text-emerald-400" />
                     <div>
-                      <div className="font-medium text-gray-900 dark:text-white">Analyzing research papers...</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">Searching through medical literature</div>
+                      <div className="font-medium text-gray-900 dark:text-white">
+                        Analyzing research papers...
+                      </div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        Searching through medical literature
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -291,7 +321,10 @@ export default function Chat() {
       </div>
 
       {/* Input */}
-      <form onSubmit={handleSubmit} className="border-t-2 border-gray-100 dark:border-gray-700 bg-gradient-to-r from-white to-gray-50 dark:from-gray-800 dark:to-gray-800 p-5 rounded-b-2xl">
+      <form
+        onSubmit={handleSubmit}
+        className="border-t-2 border-gray-100 dark:border-gray-700 bg-gradient-to-r from-white to-gray-50 dark:from-gray-800 dark:to-gray-800 p-5 rounded-b-2xl"
+      >
         <div className="flex space-x-3">
           <input
             type="text"

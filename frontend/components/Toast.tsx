@@ -38,7 +38,9 @@ export default function Toast({ message, type, onClose, duration = 5000 }: Toast
 
   return (
     <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-5">
-      <div className={`${colors[type]} rounded-xl shadow-2xl p-4 min-w-[300px] max-w-md flex items-start space-x-3`}>
+      <div
+        className={`${colors[type]} rounded-xl shadow-2xl p-4 min-w-[300px] max-w-md flex items-start space-x-3`}
+      >
         <Icon className="w-5 h-5 flex-shrink-0 mt-0.5" />
         <div className="flex-1">
           <p className="text-sm font-medium">{message}</p>
@@ -74,10 +76,3 @@ export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
     </>
   )
 }
-
-
-
-
-
-
-

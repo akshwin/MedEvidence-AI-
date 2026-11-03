@@ -56,6 +56,7 @@ frontend/
 The frontend connects to the backend API at `http://localhost:8000` by default.
 
 **Endpoints Used:**
+
 - `POST /api/query` - Submit research questions
 - `POST /api/search` - Search for papers
 - `GET /api/papers/{pmid}` - Get paper details
@@ -96,11 +97,12 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 ## 🐛 Troubleshooting
 
 **CORS Errors:**
+
 - Make sure backend CORS is configured to allow `http://localhost:3000`
 - Check that backend is running on the correct port
 
 **API Connection Issues:**
+
 - Verify backend is running: `curl http://localhost:8000/health`
 - Check `.env` file has correct `NEXT_PUBLIC_API_URL`
 - Check browser console for errors
-

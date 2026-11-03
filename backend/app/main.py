@@ -3,20 +3,34 @@ MedEvidence - Evidence-Based Medical Research LLM Platform
 FastAPI Backend
 """
 
+import logging
+
+# Configure before app imports so import-time warnings are formatted too
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.api.routes import query, search, papers, contact, auth, conversations, dashboard
+from app.database import Base, engine
+from app.models import (
+    user as _user,
+    conversation as _conversation,
+    dashboard as _dashboard,
+)  # noqa: F401 (registers tables)
+from app.api.routes import query, search, contact, auth, conversations, dashboard
 from app.middleware.usage_tracking import UsageTrackingMiddleware
 from app.services.sentry_service import init_sentry
 
 # Initialize Sentry error tracking
 init_sentry()
 
+# Create any missing tables (no-op for existing ones)
+Base.metadata.create_all(bind=engine)
+
 app = FastAPI(
     title="MedEvidence AI API",
     description="Evidence-based medical research assistant with peer-reviewed citations",
-    version="0.1.0"
+    version="0.1.0",
 )
 
 # Add usage tracking middleware (before CORS)
@@ -51,7 +65,6 @@ app.include_router(conversations.router, prefix="/api/conversations", tags=["con
 app.include_router(dashboard.router, prefix="/api/dashboard", tags=["dashboard"])
 app.include_router(query.router, prefix="/api", tags=["query"])
 app.include_router(search.router, prefix="/api/search", tags=["search"])
-app.include_router(papers.router, prefix="/api", tags=["papers"])
 app.include_router(contact.router, prefix="/api", tags=["contact"])
 
 
@@ -61,11 +74,10 @@ async def root():
         "message": "MedEvidence AI API",
         "version": "0.1.0",
         "description": "Evidence-based medical research platform",
-        "docs": "/docs"
+        "docs": "/docs",
     }
 
 
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
-

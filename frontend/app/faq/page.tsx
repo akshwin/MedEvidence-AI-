@@ -14,43 +14,53 @@ interface FAQItem {
 const faqs: FAQItem[] = [
   {
     question: 'What is MedEvidence AI?',
-    answer: 'MedEvidence AI is an AI-powered medical research platform that provides instant, evidence-based answers from peer-reviewed medical literature. It searches through 30+ million PubMed citations to deliver accurate, clinically relevant information with full citations.',
+    answer:
+      'MedEvidence AI is an AI-powered medical research platform that provides instant, evidence-based answers from peer-reviewed medical literature. It searches through 30+ million PubMed citations to deliver accurate, clinically relevant information with full citations.',
   },
   {
     question: 'How accurate are the answers?',
-    answer: 'All answers are sourced from peer-reviewed medical papers indexed in PubMed. Our AI synthesizes information from multiple high-quality sources and provides citations for verification. However, MedEvidence AI is a research tool and does not replace professional medical advice.',
+    answer:
+      'All answers are sourced from peer-reviewed medical papers indexed in PubMed. Our AI synthesizes information from multiple high-quality sources and provides citations for verification. However, MedEvidence AI is a research tool and does not replace professional medical advice.',
   },
   {
     question: 'Is MedEvidence AI free to use?',
-    answer: 'Yes! We offer a free plan with 10 questions per day and 5 paper searches per day. We also have Pro and Enterprise plans with additional features for healthcare professionals and institutions.',
+    answer:
+      'Yes! We offer a free plan with 10 questions per day and 5 paper searches per day. We also have Pro and Enterprise plans with additional features for healthcare professionals and institutions.',
   },
   {
     question: 'Can I use this for medical diagnosis?',
-    answer: 'No. MedEvidence AI is a research and educational tool only. It does not provide medical advice, diagnosis, or treatment recommendations. Always consult qualified healthcare professionals for medical decisions.',
+    answer:
+      'No. MedEvidence AI is a research and educational tool only. It does not provide medical advice, diagnosis, or treatment recommendations. Always consult qualified healthcare professionals for medical decisions.',
   },
   {
     question: 'How do citations work?',
-    answer: 'Every answer includes citations from the peer-reviewed papers used. You can click on citations to view the full paper details, including authors, journal, publication date, and direct links to PubMed.',
+    answer:
+      'Every answer includes citations from the peer-reviewed papers used. You can click on citations to view the full paper details, including authors, journal, publication date, and direct links to PubMed.',
   },
   {
     question: 'Can I download my research results?',
-    answer: 'Yes! You can download answers as PDF files, which include the full answer, all citations, and proper formatting. Pro and Enterprise plans offer unlimited downloads.',
+    answer:
+      'Yes! You can download answers as PDF files, which include the full answer, all citations, and proper formatting. Pro and Enterprise plans offer unlimited downloads.',
   },
   {
     question: 'What makes MedEvidence AI different from other medical search tools?',
-    answer: 'MedEvidence AI uses advanced AI to synthesize information from multiple papers into coherent answers, rather than just returning a list of papers. It understands clinical context and provides evidence-based answers with citations in seconds.',
+    answer:
+      'MedEvidence AI uses advanced AI to synthesize information from multiple papers into coherent answers, rather than just returning a list of papers. It understands clinical context and provides evidence-based answers with citations in seconds.',
   },
   {
     question: 'Is my data secure?',
-    answer: 'Yes. We take data security seriously and implement appropriate technical and organizational measures to protect your information. We do not share your queries or personal data with third parties.',
+    answer:
+      'Yes. We take data security seriously and implement appropriate technical and organizational measures to protect your information. We do not share your queries or personal data with third parties.',
   },
   {
     question: 'Can I integrate MedEvidence AI with my EHR system?',
-    answer: 'Enterprise plans include custom integration options. Please contact our sales team to discuss integration requirements and implementation.',
+    answer:
+      'Enterprise plans include custom integration options. Please contact our sales team to discuss integration requirements and implementation.',
   },
   {
     question: 'How often is the database updated?',
-    answer: 'Our database is continuously updated with new papers from PubMed. We process new publications regularly to ensure you have access to the latest medical research.',
+    answer:
+      'Our database is continuously updated with new papers from PubMed. We process new publications regularly to ensure you have access to the latest medical research.',
   },
 ]
 
@@ -102,11 +112,18 @@ export default function FAQPage() {
             <span>Frequently Asked Questions</span>
           </div>
           <h1 className="text-5xl sm:text-6xl font-extrabold text-gray-900 dark:text-white mb-6">
-            Got <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Questions?</span>
+            Got{' '}
+            <span className="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+              Questions?
+            </span>
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Find answers to common questions about MedEvidence AI. Can't find what you're looking for?{' '}
-            <Link href="/contact" className="text-emerald-600 dark:text-emerald-400 hover:underline font-semibold">
+            Find answers to common questions about MedEvidence AI. Can't find what you're looking
+            for?{' '}
+            <Link
+              href="/contact"
+              className="text-emerald-600 dark:text-emerald-400 hover:underline font-semibold"
+            >
               Contact us
             </Link>
             .
@@ -124,7 +141,9 @@ export default function FAQPage() {
                 onClick={() => toggleFAQ(index)}
                 className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
               >
-                <span className="font-semibold text-gray-900 dark:text-white pr-4">{faq.question}</span>
+                <span className="font-semibold text-gray-900 dark:text-white pr-4">
+                  {faq.question}
+                </span>
                 <ChevronDown
                   className={`w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0 transition-transform ${
                     openIndex === index ? 'transform rotate-180' : ''
@@ -161,4 +180,3 @@ export default function FAQPage() {
     </div>
   )
 }
-

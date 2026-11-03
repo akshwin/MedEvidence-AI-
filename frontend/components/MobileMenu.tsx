@@ -69,7 +69,9 @@ export default function MobileMenu({ onNavigate }: MobileMenuProps) {
                   <div className="w-10 h-10 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600 rounded-xl flex items-center justify-center">
                     <Brain className="w-6 h-6 text-white" />
                   </div>
-                  <span className="font-bold text-lg text-gray-900 dark:text-white">MedEvidence AI</span>
+                  <span className="font-bold text-lg text-gray-900 dark:text-white">
+                    MedEvidence AI
+                  </span>
                 </div>
                 <button
                   onClick={() => setIsOpen(false)}
@@ -232,5 +234,3 @@ export default function MobileMenu({ onNavigate }: MobileMenuProps) {
     </>
   )
 }
-
-

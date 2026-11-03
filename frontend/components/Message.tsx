@@ -1,7 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { User, Sparkles, ChevronDown, ChevronUp, ExternalLink, FileText, Copy, Check } from 'lucide-react'
+import {
+  User,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
+  FileText,
+  Copy,
+  Check,
+} from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import { Citation } from '@/lib/api'
 import CitationComponent from './Citation'
@@ -29,11 +38,7 @@ export default function Message({ role, content, citations }: MessageProps) {
   }
 
   return (
-    <div
-      className={`flex space-x-4 ${
-        role === 'user' ? 'flex-row-reverse space-x-reverse' : ''
-      }`}
-    >
+    <div className={`flex space-x-4 ${role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
       {/* Avatar */}
       <div
         className={`flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg ${
@@ -78,16 +83,25 @@ export default function Message({ role, content, citations }: MessageProps) {
             <div className="markdown-content">
               <ReactMarkdown
                 components={{
-                  h2: ({node, ...props}: any) => (
-                    <h2 className="text-xl font-bold mt-6 mb-4 text-emerald-700 dark:text-emerald-400 border-b-2 border-emerald-200 dark:border-emerald-800 pb-2 first:mt-0" {...props} />
+                  h2: ({ node, ...props }: any) => (
+                    <h2
+                      className="text-xl font-bold mt-6 mb-4 text-emerald-700 dark:text-emerald-400 border-b-2 border-emerald-200 dark:border-emerald-800 pb-2 first:mt-0"
+                      {...props}
+                    />
                   ),
-                  h3: ({node, ...props}: any) => (
-                    <h3 className="text-lg font-semibold mt-4 mb-3 text-teal-700 dark:text-teal-400" {...props} />
+                  h3: ({ node, ...props }: any) => (
+                    <h3
+                      className="text-lg font-semibold mt-4 mb-3 text-teal-700 dark:text-teal-400"
+                      {...props}
+                    />
                   ),
-                  p: ({node, ...props}: any) => (
-                    <p className="leading-relaxed mb-3 text-gray-700 dark:text-gray-200 last:mb-0" {...props} />
+                  p: ({ node, ...props }: any) => (
+                    <p
+                      className="leading-relaxed mb-3 text-gray-700 dark:text-gray-200 last:mb-0"
+                      {...props}
+                    />
                   ),
-                  strong: ({node, ...props}: any) => (
+                  strong: ({ node, ...props }: any) => (
                     <strong className="font-semibold text-gray-900 dark:text-white" {...props} />
                   ),
                 }}

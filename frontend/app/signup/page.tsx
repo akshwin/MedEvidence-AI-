@@ -50,7 +50,10 @@ export default function SignupPage() {
         setVerificationUrl(result.verification_url)
         showToast('Account created! Verification link shown below.', 'info')
       } else {
-        showToast('Account created successfully! Please check your email to verify your account.', 'success')
+        showToast(
+          'Account created successfully! Please check your email to verify your account.',
+          'success',
+        )
       }
       setTimeout(() => {
         router.push('/')
@@ -74,7 +77,8 @@ export default function SignupPage() {
             Account Created!
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            We've sent a verification email to <strong>{email}</strong>. Please check your inbox and verify your email address.
+            We've sent a verification email to <strong>{email}</strong>. Please check your inbox and
+            verify your email address.
           </p>
           {verificationUrl && (
             <div className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg text-left">
@@ -145,7 +149,10 @@ export default function SignupPage() {
             )}
 
             <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="fullName"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 Full Name (Optional)
               </label>
               <div className="relative">
@@ -162,7 +169,10 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 Email address
               </label>
               <div className="relative">
@@ -180,7 +190,10 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 Password
               </label>
               <div className="relative">
@@ -211,7 +224,10 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 Confirm Password
               </label>
               <div className="relative">
@@ -230,7 +246,11 @@ export default function SignupPage() {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 >
-                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showConfirmPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
               </div>
               {confirmPassword && password !== confirmPassword && (
@@ -284,4 +304,3 @@ export default function SignupPage() {
     </div>
   )
 }
-

@@ -3,6 +3,9 @@ LLM Service - Handles LLM interactions using Groq
 """
 
 import os
+import re
+import json
+from typing import List, Dict, Optional
 from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage, SystemMessage
 from app.core.config import settings
@@ -10,45 +13,121 @@ from app.core.config import settings
 
 class LLMService:
     """Service for LLM interactions using Groq"""
-    
+
     def __init__(self):
         # Set Groq API key from environment or config (never hardcode secrets)
         groq_api_key = os.environ.get("GROQ_API_KEY") or settings.groq_api_key
         if not groq_api_key:
-            raise RuntimeError("GROQ_API_KEY is not configured. Set it as an environment variable to enable LLM answers.")
-        
+            raise RuntimeError(
+                "GROQ_API_KEY is not configured. Set it as an environment variable to enable LLM answers."
+            )
+
         # Set environment variable for Groq (in case it's needed)
         os.environ["GROQ_API_KEY"] = groq_api_key
-        
+
         self.llm = ChatGroq(
             model_name=settings.llm_model,
             temperature=settings.temperature,
             max_tokens=settings.max_tokens,
-            groq_api_key=groq_api_key
+            groq_api_key=groq_api_key,
         )
-    
+        # Separate model (and Groq rate-limit bucket) for the short retrieval helper calls
+        self.helper_llm = ChatGroq(
+            model_name=settings.llm_helper_model,
+            temperature=0,
+            max_tokens=3000,
+            reasoning_effort="low",  # gpt-oss reasoning otherwise eats the token budget
+            groq_api_key=groq_api_key,
+        )
+
     async def generate_answer(self, query: str, context: str) -> str:
         """
         Generate answer using LLM with context
-        
+
         Args:
             query: User's question
             context: Retrieved paper context
-            
+
         Returns:
             Generated answer
         """
         prompt = self._build_prompt(query, context)
-        
+
         # Use LangChain's async invoke for async support
         messages = [
-            SystemMessage(content="You are a medical research assistant. Provide evidence-based answers based on medical literature."),
-            HumanMessage(content=prompt)
+            SystemMessage(
+                content="You are a medical research assistant. Provide evidence-based answers based on medical literature."
+            ),
+            HumanMessage(content=prompt),
         ]
-        
+
         response = await self.llm.ainvoke(messages)
         return response.content
-    
+
+    async def build_pubmed_query(self, question: str) -> Optional[str]:
+        """Turn a natural-language question into a PubMed boolean query (None if unusable)"""
+        messages = [
+            SystemMessage(
+                content="You are an expert medical librarian who writes PubMed search queries."
+            ),
+            HumanMessage(
+                content=f"""Write a PubMed query that finds papers directly answering this question.
+
+Rules:
+- Combine concepts with AND; within a concept, OR together the MeSH term ("..."[MeSH Terms]) and free-text synonyms ([tiab]).
+- For treatment questions, include therapy synonyms and the major drug classes / interventions for the condition.
+- Do NOT add date, language or publication-type filters, and do not add words like "latest", "new" or "recent" (recency is filtered separately).
+- Reply with the query only, on one line, no explanation.
+
+Question: {question}"""
+            ),
+        ]
+        response = await self.helper_llm.ainvoke(messages)
+        return self.clean_pubmed_query(response.content)
+
+    async def rerank_papers(self, question: str, papers: List[Dict], top_n: int) -> List[Dict]:
+        """Keep the papers that actually answer the question, most relevant first"""
+        listing = "\n".join(
+            f"[{i}] {p.get('title', '')} ({p.get('year', '')}) - {p.get('abstract', '')[:200]}"
+            for i, p in enumerate(papers)
+        )
+        messages = [
+            SystemMessage(content="You are a medical research assistant ranking search results."),
+            HumanMessage(
+                content=f"""Question: {question}
+
+Papers:
+{listing}
+
+Return a JSON array of the indices of papers that directly help answer the question, most relevant first, at most {top_n}. Omit papers that are only loosely related (e.g. about risk factors when the question asks about treatments). Reply with the JSON array only."""
+            ),
+        ]
+        response = await self.helper_llm.ainvoke(messages)
+        indices = self.parse_indices(response.content, len(papers))
+        return [papers[i] for i in indices[:top_n]]
+
+    @staticmethod
+    def clean_pubmed_query(text: str) -> Optional[str]:
+        """Strip code fences/labels; reject replies that don't look like a query"""
+        text = re.sub(r"```\w*", "", text or "").strip()
+        text = re.sub(r"^(pubmed )?query:\s*", "", text, flags=re.IGNORECASE)
+        text = " ".join(text.split())
+        if not text or len(text) > 1500 or text.count("(") != text.count(")"):
+            return None
+        return text
+
+    @staticmethod
+    def parse_indices(text: str, n: int) -> List[int]:
+        """Parse a JSON index array from an LLM reply; drop invalid/duplicate entries"""
+        match = re.search(r"\[[\d,\s]*\]", text or "")
+        if not match:
+            return []
+        seen = []
+        for i in json.loads(match.group(0)):
+            if 0 <= i < n and i not in seen:
+                seen.append(i)
+        return seen
+
     def _build_prompt(self, query: str, context: str) -> str:
         """Build prompt for LLM with STRICT instructions to use only provided papers"""
         return f"""You are a medical research assistant. You MUST answer the question based ONLY on the provided research papers from PubMed. DO NOT use your general knowledge or training data.
@@ -99,4 +178,3 @@ Research Papers from PubMed:
 Question: {query}
 
 Answer (structured with headings, paper names as subheadings, NO references section at the end):"""
-

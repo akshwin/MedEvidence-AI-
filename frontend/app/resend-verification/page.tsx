@@ -34,7 +34,8 @@ export default function ResendVerificationPage() {
         showToast(result.message || 'Verification email sent!', 'success')
       }
     } catch (err: any) {
-      const errorMessage = err.response?.data?.detail || err.message || 'Failed to resend verification email'
+      const errorMessage =
+        err.response?.data?.detail || err.message || 'Failed to resend verification email'
       setError(errorMessage)
       showToast(errorMessage, 'error')
     } finally {
@@ -49,11 +50,10 @@ export default function ResendVerificationPage() {
           <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Email Sent!
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Email Sent!</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            If an account with <strong>{email}</strong> exists and is not yet verified, a verification email has been sent. Please check your inbox and spam folder.
+            If an account with <strong>{email}</strong> exists and is not yet verified, a
+            verification email has been sent. Please check your inbox and spam folder.
           </p>
           {verificationUrl && (
             <div className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg">
@@ -135,7 +135,10 @@ export default function ResendVerificationPage() {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 Email address
               </label>
               <div className="relative">
@@ -197,4 +200,3 @@ export default function ResendVerificationPage() {
     </div>
   )
 }
-

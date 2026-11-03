@@ -25,7 +25,7 @@ api.interceptors.response.use(
     // Don't redirect on 401 - let components handle authentication
     // They can check isAuthenticated and redirect if needed
     return Promise.reject(error)
-  }
+  },
 )
 
 export interface QueryRequest {
@@ -74,7 +74,7 @@ export const queryResearch = async (query: string): Promise<QueryResponse> => {
   const response = await api.post<QueryResponse>('/api/query', {
     query,
     language: 'en',
-    auto_detect_language: false
+    auto_detect_language: false,
   })
   return response.data
 }
@@ -96,7 +96,7 @@ export interface SearchFilters {
 export const searchPapers = async (
   query: string,
   limit: number = 10,
-  filters?: SearchFilters
+  filters?: SearchFilters,
 ): Promise<SearchResponse> => {
   const response = await api.post<SearchResponse>('/api/search', {
     query,
@@ -106,12 +106,6 @@ export const searchPapers = async (
     include_non_english: false,
     ...filters,
   })
-  return response.data
-}
-
-// Get paper details
-export const getPaper = async (pmid: string): Promise<Paper> => {
-  const response = await api.get<Paper>(`/api/papers/${pmid}`)
   return response.data
 }
 
@@ -187,8 +181,16 @@ export const authApi = {
     return response.data
   },
 
-  register: async (email: string, password: string, fullName?: string): Promise<{ message: string; user_id: string; verification_url?: string }> => {
-    const response = await api.post<{ message: string; user_id: string; verification_url?: string }>('/api/auth/register', {
+  register: async (
+    email: string,
+    password: string,
+    fullName?: string,
+  ): Promise<{ message: string; user_id: string; verification_url?: string }> => {
+    const response = await api.post<{
+      message: string
+      user_id: string
+      verification_url?: string
+    }>('/api/auth/register', {
       email,
       password,
       full_name: fullName,
@@ -214,8 +216,13 @@ export const authApi = {
     }
   },
 
-  resendVerification: async (email: string): Promise<{ message: string; verification_url?: string }> => {
-    const response = await api.post<{ message: string; verification_url?: string }>('/api/auth/resend-verification', { email })
+  resendVerification: async (
+    email: string,
+  ): Promise<{ message: string; verification_url?: string }> => {
+    const response = await api.post<{ message: string; verification_url?: string }>(
+      '/api/auth/resend-verification',
+      { email },
+    )
     return response.data
   },
 
@@ -232,7 +239,10 @@ export const authApi = {
     return response.data
   },
 
-  changePassword: async (oldPassword: string, newPassword: string): Promise<{ message: string }> => {
+  changePassword: async (
+    oldPassword: string,
+    newPassword: string,
+  ): Promise<{ message: string }> => {
     const response = await api.post<{ message: string }>('/api/auth/change-password', {
       old_password: oldPassword,
       new_password: newPassword,
@@ -301,7 +311,10 @@ export const conversationsApi = {
     return response.data
   },
 
-  update: async (id: string, data: { title?: string; is_archived?: boolean }): Promise<ConversationData> => {
+  update: async (
+    id: string,
+    data: { title?: string; is_archived?: boolean },
+  ): Promise<ConversationData> => {
     const response = await api.put<ConversationData>(`/api/conversations/${id}`, data)
     return response.data
   },
@@ -311,7 +324,9 @@ export const conversationsApi = {
   },
 
   share: async (id: string): Promise<{ share_token: string; share_url: string }> => {
-    const response = await api.post<{ share_token: string; share_url: string }>(`/api/conversations/${id}/share`)
+    const response = await api.post<{ share_token: string; share_url: string }>(
+      `/api/conversations/${id}/share`,
+    )
     return response.data
   },
 
@@ -457,10 +472,7 @@ export const dashboardApi = {
     return response.data
   },
 
-  listBookmarks: async (params?: {
-    limit?: number
-    offset?: number
-  }): Promise<Bookmark[]> => {
+  listBookmarks: async (params?: { limit?: number; offset?: number }): Promise<Bookmark[]> => {
     const response = await api.get<Bookmark[]>('/api/dashboard/bookmarks', { params })
     return response.data
   },
@@ -469,8 +481,12 @@ export const dashboardApi = {
     await api.delete(`/api/dashboard/bookmarks/${id}`)
   },
 
-  checkBookmark: async (paperId: string): Promise<{ is_bookmarked: boolean; bookmark_id: string | null }> => {
-    const response = await api.get<{ is_bookmarked: boolean; bookmark_id: string | null }>(`/api/dashboard/bookmarks/check/${paperId}`)
+  checkBookmark: async (
+    paperId: string,
+  ): Promise<{ is_bookmarked: boolean; bookmark_id: string | null }> => {
+    const response = await api.get<{ is_bookmarked: boolean; bookmark_id: string | null }>(
+      `/api/dashboard/bookmarks/check/${paperId}`,
+    )
     return response.data
   },
 
@@ -494,15 +510,21 @@ export const dashboardApi = {
     return response.data
   },
 
-  addPaperToReadingList: async (listId: string, data: {
-    paper_id: string
-    paper_title?: string
-    paper_authors?: string[]
-    paper_year?: number
-    paper_journal?: string
-    notes?: string
-  }): Promise<{ id: string; message: string }> => {
-    const response = await api.post<{ id: string; message: string }>(`/api/dashboard/reading-lists/${listId}/papers`, data)
+  addPaperToReadingList: async (
+    listId: string,
+    data: {
+      paper_id: string
+      paper_title?: string
+      paper_authors?: string[]
+      paper_year?: number
+      paper_journal?: string
+      notes?: string
+    },
+  ): Promise<{ id: string; message: string }> => {
+    const response = await api.post<{ id: string; message: string }>(
+      `/api/dashboard/reading-lists/${listId}/papers`,
+      data,
+    )
     return response.data
   },
 
@@ -535,13 +557,16 @@ export const dashboardApi = {
     return response.data
   },
 
-  updateNote: async (id: string, data: {
-    paper_id: string
-    paper_title?: string
-    title?: string
-    content: string
-    tags?: string[]
-  }): Promise<PaperNote> => {
+  updateNote: async (
+    id: string,
+    data: {
+      paper_id: string
+      paper_title?: string
+      title?: string
+      content: string
+      tags?: string[]
+    },
+  ): Promise<PaperNote> => {
     const response = await api.put<PaperNote>(`/api/dashboard/notes/${id}`, data)
     return response.data
   },
@@ -561,9 +586,7 @@ export const dashboardApi = {
     return response.data
   },
 
-  listAlerts: async (params?: {
-    is_active?: boolean
-  }): Promise<Alert[]> => {
+  listAlerts: async (params?: { is_active?: boolean }): Promise<Alert[]> => {
     const response = await api.get<Alert[]>('/api/dashboard/alerts', { params })
     return response.data
   },
@@ -578,9 +601,7 @@ export const dashboardApi = {
   },
 
   // Activity
-  getActivity: async (params?: {
-    limit?: number
-  }): Promise<Activity[]> => {
+  getActivity: async (params?: { limit?: number }): Promise<Activity[]> => {
     const response = await api.get<Activity[]>('/api/dashboard/activity', { params })
     return response.data
   },
@@ -592,7 +613,9 @@ export const dashboardApi = {
   },
 
   getEndpointUsage: async (days: number = 30): Promise<EndpointUsage[]> => {
-    const response = await api.get<EndpointUsage[]>('/api/dashboard/usage/endpoints', { params: { days } })
+    const response = await api.get<EndpointUsage[]>('/api/dashboard/usage/endpoints', {
+      params: { days },
+    })
     return response.data
   },
 
@@ -626,17 +649,20 @@ export const dashboardApi = {
     return response.data
   },
 
-  updateAnnotation: async (id: string, data: {
-    paper_id: string
-    paper_title?: string
-    annotation_type?: string
-    selected_text?: string
-    start_offset?: number
-    end_offset?: number
-    content?: string
-    color?: string
-    tags?: string[]
-  }): Promise<PaperAnnotation> => {
+  updateAnnotation: async (
+    id: string,
+    data: {
+      paper_id: string
+      paper_title?: string
+      annotation_type?: string
+      selected_text?: string
+      start_offset?: number
+      end_offset?: number
+      content?: string
+      color?: string
+      tags?: string[]
+    },
+  ): Promise<PaperAnnotation> => {
     const response = await api.put<PaperAnnotation>(`/api/dashboard/annotations/${id}`, data)
     return response.data
   },
@@ -700,17 +726,24 @@ export const searchApi = {
   },
 
   getRelatedPapers: async (paperId: string, limit: number = 10): Promise<SearchResponse> => {
-    const response = await api.get<SearchResponse>(`/api/search/papers/${paperId}/related`, { params: { limit } })
+    const response = await api.get<SearchResponse>(`/api/search/papers/${paperId}/related`, {
+      params: { limit },
+    })
     return response.data
   },
 
   getCitedBy: async (paperId: string, limit: number = 10): Promise<SearchResponse> => {
-    const response = await api.get<SearchResponse>(`/api/search/papers/${paperId}/cited-by`, { params: { limit } })
+    const response = await api.get<SearchResponse>(`/api/search/papers/${paperId}/cited-by`, {
+      params: { limit },
+    })
     return response.data
   },
 
   getRecommendations: async (paperId: string, limit: number = 10): Promise<SearchResponse> => {
-    const response = await api.get<SearchResponse>(`/api/search/papers/${paperId}/recommendations`, { params: { limit } })
+    const response = await api.get<SearchResponse>(
+      `/api/search/papers/${paperId}/recommendations`,
+      { params: { limit } },
+    )
     return response.data
   },
 }

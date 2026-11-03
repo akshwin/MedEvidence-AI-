@@ -107,12 +107,8 @@ export default function ResetPasswordPage() {
               </h1>
             </div>
           </Link>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Reset Password
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            Enter your new password below
-          </p>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Reset Password</h2>
+          <p className="text-gray-600 dark:text-gray-400">Enter your new password below</p>
         </div>
 
         {/* Reset Form */}
@@ -125,7 +121,10 @@ export default function ResetPasswordPage() {
             )}
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 New Password
               </label>
               <div className="relative">
@@ -156,7 +155,10 @@ export default function ResetPasswordPage() {
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 Confirm New Password
               </label>
               <div className="relative">
@@ -175,7 +177,11 @@ export default function ResetPasswordPage() {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 >
-                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showConfirmPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
               </div>
               {confirmPassword && password !== confirmPassword && (
@@ -187,7 +193,9 @@ export default function ResetPasswordPage() {
 
             <button
               type="submit"
-              disabled={loading || !validatePassword(password) || password !== confirmPassword || !token}
+              disabled={
+                loading || !validatePassword(password) || password !== confirmPassword || !token
+              }
               className="w-full py-3 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2"
             >
               {loading ? (
@@ -217,9 +225,3 @@ export default function ResetPasswordPage() {
     </div>
   )
 }
-
-
-
-
-
-

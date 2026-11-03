@@ -44,9 +44,3 @@ class UserPreferences(Base):
 
     def __repr__(self):
         return f"<UserPreferences(user_id={self.user_id}, theme={self.theme})>"
-
-
-
-
-
-

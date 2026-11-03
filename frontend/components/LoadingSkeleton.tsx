@@ -37,10 +37,3 @@ export function SearchResultSkeleton() {
     </div>
   )
 }
-
-
-
-
-
-
-

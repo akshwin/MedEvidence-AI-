@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Share2, Trash2, Download, Loader2 } from 'lucide-react'
@@ -22,13 +22,7 @@ export default function ConversationDetailPage() {
   const [deleteDialog, setDeleteDialog] = useState(false)
   const { showToast } = useToast()
 
-  useEffect(() => {
-    if (conversationId) {
-      loadConversation()
-    }
-  }, [conversationId])
-
-  const loadConversation = async () => {
+  const loadConversation = useCallback(async () => {
     try {
       setLoading(true)
       const data = await conversationsApi.get(conversationId)
@@ -40,7 +34,13 @@ export default function ConversationDetailPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [conversationId, router, showToast])
+
+  useEffect(() => {
+    if (conversationId) {
+      loadConversation()
+    }
+  }, [conversationId, loadConversation])
 
   const handleDeleteClick = () => {
     setDeleteDialog(true)
@@ -75,7 +75,7 @@ export default function ConversationDetailPage() {
       await copyToClipboard(shareUrl)
       return
     }
-    
+
     setSharing(true)
     try {
       const result = await conversationsApi.share(conversationId)
@@ -133,19 +133,24 @@ export default function ConversationDetailPage() {
   const handleDownload = () => {
     if (!conversation) return
 
-    const userMessages = conversation.messages.filter(m => m.role === 'user')
-    const assistantMessages = conversation.messages.filter(m => m.role === 'assistant')
+    const userMessages = conversation.messages.filter((m) => m.role === 'user')
+    const assistantMessages = conversation.messages.filter((m) => m.role === 'assistant')
 
     if (userMessages.length > 0 && assistantMessages.length > 0) {
       const lastUserMessage = userMessages[userMessages.length - 1]
       const lastAssistantMessage = assistantMessages[assistantMessages.length - 1]
-      
-      const filename = `medevidence-${conversation.title?.substring(0, 30).replace(/[^a-z0-9]/gi, '-').toLowerCase() || 'conversation'}-${Date.now()}.pdf`
+
+      const filename = `medevidence-${
+        conversation.title
+          ?.substring(0, 30)
+          .replace(/[^a-z0-9]/gi, '-')
+          .toLowerCase() || 'conversation'
+      }-${Date.now()}.pdf`
       downloadAnswerPDF(
         lastUserMessage.content,
         lastAssistantMessage.content,
         lastAssistantMessage.citations || [],
-        filename
+        filename,
       )
       showToast('PDF downloaded successfully!', 'success')
     }
@@ -189,13 +194,17 @@ export default function ConversationDetailPage() {
                   sharing
                     ? 'opacity-50 cursor-not-allowed text-gray-400'
                     : conversation.is_shared
-                    ? 'text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400'
+                      ? 'text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300'
+                      : 'text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400'
                 }`}
                 type="button"
                 title={conversation.is_shared ? 'Copy share link' : 'Share conversation'}
               >
-                {sharing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />}
+                {sharing ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Share2 className="w-4 h-4" />
+                )}
                 <span>{conversation.is_shared ? 'Copy Link' : 'Share'}</span>
               </button>
               <button
@@ -210,54 +219,63 @@ export default function ConversationDetailPage() {
           }
         />
 
-      {/* Content */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-4xl">
-        {/* Breadcrumb */}
-        <nav className="mb-6 flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-          <Link href="/" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
-            Home
-          </Link>
-          <span>/</span>
-          <Link href="/research" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
-            Research
-          </Link>
-          <span>/</span>
-          <Link href="/conversations" className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
-            History
-          </Link>
-          <span>/</span>
-          <span className="text-gray-900 dark:text-white font-medium">Conversation</span>
-        </nav>
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            {conversation.title || 'Untitled Conversation'}
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            {new Date(conversation.created_at).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            })}
-          </p>
-        </div>
+        {/* Content */}
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-4xl">
+          {/* Breadcrumb */}
+          <nav className="mb-6 flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+            <Link
+              href="/"
+              className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+            >
+              Home
+            </Link>
+            <span>/</span>
+            <Link
+              href="/research"
+              className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+            >
+              Research
+            </Link>
+            <span>/</span>
+            <Link
+              href="/conversations"
+              className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+            >
+              History
+            </Link>
+            <span>/</span>
+            <span className="text-gray-900 dark:text-white font-medium">Conversation</span>
+          </nav>
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              {conversation.title || 'Untitled Conversation'}
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {new Date(conversation.created_at).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </p>
+          </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-8">
-          <div className="space-y-6">
-            {conversation.messages.map((message, index) => (
-              <Message
-                key={index}
-                role={message.role}
-                content={message.content}
-                citations={message.citations}
-              />
-            ))}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-8">
+            <div className="space-y-6">
+              {conversation.messages.map((message, index) => (
+                <Message
+                  key={index}
+                  role={message.role}
+                  content={message.content}
+                  citations={message.citations}
+                />
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Delete Confirmation Dialog */}
+        {/* Delete Confirmation Dialog */}
         <ConfirmDialog
           isOpen={deleteDialog}
           title="Delete Conversation"
@@ -272,4 +290,3 @@ export default function ConversationDetailPage() {
     </RequireAuth>
   )
 }
-

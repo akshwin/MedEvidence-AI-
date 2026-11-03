@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Sparkles, Link2, TrendingUp, Loader2, FileText, ExternalLink, X } from 'lucide-react'
 import { type Paper, searchApi } from '@/lib/api'
 import { formatAuthors } from '@/lib/utils'
@@ -20,17 +20,15 @@ interface PaperAnalysisPanelProps {
 }
 
 export default function PaperAnalysisPanel({ paper, onClose }: PaperAnalysisPanelProps) {
-  const [activeTab, setActiveTab] = useState<'recommendations' | 'related' | 'cited'>('recommendations')
+  const [activeTab, setActiveTab] = useState<'recommendations' | 'related' | 'cited'>(
+    'recommendations',
+  )
   const [recommendations, setRecommendations] = useState<Paper[]>([])
   const [relatedPapers, setRelatedPapers] = useState<Paper[]>([])
   const [citedBy, setCitedBy] = useState<Paper[]>([])
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    loadData()
-  }, [paper.pmid, activeTab])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!paper.pmid) {
       console.error('Paper PMID is missing')
       return
@@ -61,9 +59,18 @@ export default function PaperAnalysisPanel({ paper, onClose }: PaperAnalysisPane
     } finally {
       setLoading(false)
     }
-  }
+  }, [paper.pmid, activeTab])
 
-  const currentPapers = activeTab === 'recommendations' ? recommendations : activeTab === 'related' ? relatedPapers : citedBy
+  useEffect(() => {
+    loadData()
+  }, [loadData])
+
+  const currentPapers =
+    activeTab === 'recommendations'
+      ? recommendations
+      : activeTab === 'related'
+        ? relatedPapers
+        : citedBy
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
@@ -130,7 +137,13 @@ export default function PaperAnalysisPanel({ paper, onClose }: PaperAnalysisPane
         <div className="text-center py-12">
           <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-600 dark:text-gray-400">
-            No {activeTab === 'recommendations' ? 'recommendations' : activeTab === 'related' ? 'related papers' : 'citations'} found.
+            No{' '}
+            {activeTab === 'recommendations'
+              ? 'recommendations'
+              : activeTab === 'related'
+                ? 'related papers'
+                : 'citations'}{' '}
+            found.
           </p>
         </div>
       ) : (
@@ -169,4 +182,3 @@ export default function PaperAnalysisPanel({ paper, onClose }: PaperAnalysisPane
     </div>
   )
 }
-

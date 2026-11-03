@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { Brain, ArrowLeft, Download, Loader2 } from 'lucide-react'
@@ -17,13 +17,7 @@ export default function SharedConversationPage() {
   const [loading, setLoading] = useState(true)
   const { showToast } = useToast()
 
-  useEffect(() => {
-    if (shareToken) {
-      loadSharedConversation()
-    }
-  }, [shareToken])
-
-  const loadSharedConversation = async () => {
+  const loadSharedConversation = useCallback(async () => {
     try {
       setLoading(true)
       const data = await conversationsApi.getShared(shareToken)
@@ -32,24 +26,35 @@ export default function SharedConversationPage() {
       console.error('Failed to load shared conversation:', error)
       setLoading(false)
     }
-  }
+  }, [shareToken])
+
+  useEffect(() => {
+    if (shareToken) {
+      loadSharedConversation()
+    }
+  }, [shareToken, loadSharedConversation])
 
   const handleDownload = () => {
     if (!conversation) return
 
-    const userMessages = conversation.messages.filter(m => m.role === 'user')
-    const assistantMessages = conversation.messages.filter(m => m.role === 'assistant')
+    const userMessages = conversation.messages.filter((m) => m.role === 'user')
+    const assistantMessages = conversation.messages.filter((m) => m.role === 'assistant')
 
     if (userMessages.length > 0 && assistantMessages.length > 0) {
       const lastUserMessage = userMessages[userMessages.length - 1]
       const lastAssistantMessage = assistantMessages[assistantMessages.length - 1]
-      
-      const filename = `medevidence-${conversation.title?.substring(0, 30).replace(/[^a-z0-9]/gi, '-').toLowerCase() || 'conversation'}-${Date.now()}.pdf`
+
+      const filename = `medevidence-${
+        conversation.title
+          ?.substring(0, 30)
+          .replace(/[^a-z0-9]/gi, '-')
+          .toLowerCase() || 'conversation'
+      }-${Date.now()}.pdf`
       downloadAnswerPDF(
         lastUserMessage.content,
         lastAssistantMessage.content,
         lastAssistantMessage.citations || [],
-        filename
+        filename,
       )
       showToast('PDF downloaded successfully!', 'success')
     }
@@ -103,7 +108,9 @@ export default function SharedConversationPage() {
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-700 to-teal-700 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">
                   MedEvidence AI
                 </h1>
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Shared Conversation</p>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                  Shared Conversation
+                </p>
               </div>
             </Link>
             <div className="flex items-center space-x-4">
@@ -144,7 +151,7 @@ export default function SharedConversationPage() {
               month: 'long',
               day: 'numeric',
               hour: '2-digit',
-              minute: '2-digit'
+              minute: '2-digit',
             })}
           </p>
         </div>
@@ -165,9 +172,3 @@ export default function SharedConversationPage() {
     </div>
   )
 }
-
-
-
-
-
-

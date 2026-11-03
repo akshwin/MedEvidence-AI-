@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Highlighter, X, Save, Trash2, Palette } from 'lucide-react'
 import { dashboardApi, PaperAnnotation } from '@/lib/api'
 import { useAuth } from '@/lib/auth-context'
@@ -30,7 +30,12 @@ const HIGHLIGHT_COLORS = [
   { name: 'Orange', value: 'orange', class: 'bg-orange-200 dark:bg-orange-900/30' },
 ]
 
-export default function PaperAnnotationEditor({ paper, annotations, onAnnotationsChange, onClose }: PaperAnnotationEditorProps) {
+export default function PaperAnnotationEditor({
+  paper,
+  annotations,
+  onAnnotationsChange,
+  onClose,
+}: PaperAnnotationEditorProps) {
   const { isAuthenticated } = useAuth()
   const { showToast } = useToast()
   const [selectedText, setSelectedText] = useState('')
@@ -40,30 +45,14 @@ export default function PaperAnnotationEditor({ paper, annotations, onAnnotation
   const [editingAnnotation, setEditingAnnotation] = useState<PaperAnnotation | null>(null)
   const abstractRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (!abstractRef.current || !paper.abstract) return
-
-    // Apply existing highlights
-    applyHighlights()
-    
-    // Add text selection listener
-    const handleSelection = () => handleTextSelection()
-    document.addEventListener('mouseup', handleSelection)
-    document.addEventListener('keyup', handleSelection)
-    
-    return () => {
-      document.removeEventListener('mouseup', handleSelection)
-      document.removeEventListener('keyup', handleSelection)
-    }
-  }, [annotations, paper.abstract])
-
-  const applyHighlights = () => {
+  const applyHighlights = useCallback(() => {
     if (!abstractRef.current || !paper.abstract) return
 
     let html = paper.abstract
     annotations.forEach((ann) => {
       if (ann.selected_text && ann.start_offset !== null && ann.end_offset !== null) {
-        const colorClass = HIGHLIGHT_COLORS.find(c => c.value === ann.color)?.class || HIGHLIGHT_COLORS[0].class
+        const colorClass =
+          HIGHLIGHT_COLORS.find((c) => c.value === ann.color)?.class || HIGHLIGHT_COLORS[0].class
         const highlighted = `<mark class="${colorClass} annotation-${ann.id}" data-annotation-id="${ann.id}">${ann.selected_text}</mark>`
         // Simple replacement - in production, use proper text range handling
         html = html.replace(ann.selected_text, highlighted)
@@ -72,9 +61,9 @@ export default function PaperAnnotationEditor({ paper, annotations, onAnnotation
     if (abstractRef.current) {
       abstractRef.current.innerHTML = html
     }
-  }
+  }, [annotations, paper.abstract])
 
-  const handleTextSelection = () => {
+  const handleTextSelection = useCallback(() => {
     const selection = window.getSelection()
     if (!selection || selection.rangeCount === 0) return
 
@@ -87,19 +76,36 @@ export default function PaperAnnotationEditor({ paper, annotations, onAnnotation
     // Calculate offsets relative to the abstract text
     const range = selection.getRangeAt(0)
     const abstractText = paper.abstract || ''
-    
+
     // Get the text before the selection in the abstract
     const preRange = document.createRange()
     preRange.selectNodeContents(abstractRef.current!)
     preRange.setEnd(range.startContainer, range.startOffset)
     const startOffset = preRange.toString().length
-    
+
     const endOffset = startOffset + selectedText.length
 
     setSelectedText(selectedText)
     // Store offsets for later use
     ;(window as any).__lastAnnotationOffsets = { startOffset, endOffset }
-  }
+  }, [paper.abstract])
+
+  useEffect(() => {
+    if (!abstractRef.current || !paper.abstract) return
+
+    // Apply existing highlights
+    applyHighlights()
+
+    // Add text selection listener
+    const handleSelection = () => handleTextSelection()
+    document.addEventListener('mouseup', handleSelection)
+    document.addEventListener('keyup', handleSelection)
+
+    return () => {
+      document.removeEventListener('mouseup', handleSelection)
+      document.removeEventListener('keyup', handleSelection)
+    }
+  }, [applyHighlights, handleTextSelection, paper.abstract])
 
   const handleCreateAnnotation = async () => {
     if (!isAuthenticated) {
@@ -119,8 +125,11 @@ export default function PaperAnnotationEditor({ paper, annotations, onAnnotation
 
     try {
       // Get stored offsets or calculate them
-      const offsets = (window as any).__lastAnnotationOffsets || { startOffset: null, endOffset: null }
-      
+      const offsets = (window as any).__lastAnnotationOffsets || {
+        startOffset: null,
+        endOffset: null,
+      }
+
       await dashboardApi.createAnnotation({
         paper_id: paper.pmid,
         paper_title: paper.title || 'Untitled Paper',
@@ -172,7 +181,9 @@ export default function PaperAnnotationEditor({ paper, annotations, onAnnotation
         <div className="mb-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
           <div className="flex items-start justify-between mb-3">
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Selected Text:</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">
+                Selected Text:
+              </p>
               <p className="text-sm text-gray-700 dark:text-gray-300 italic">"{selectedText}"</p>
             </div>
             <button
@@ -200,8 +211,6 @@ export default function PaperAnnotationEditor({ paper, annotations, onAnnotation
               ))}
             </div>
           </div>
-
-
 
           <button
             onClick={handleCreateAnnotation}
@@ -237,17 +246,23 @@ export default function PaperAnnotationEditor({ paper, annotations, onAnnotation
       {/* Existing Annotations */}
       {annotations.length > 0 && (
         <div>
-          <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Your Annotations:</p>
+          <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            Your Annotations:
+          </p>
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {annotations.map((ann) => {
-              const colorClass = HIGHLIGHT_COLORS.find(c => c.value === ann.color)?.class || HIGHLIGHT_COLORS[0].class
+              const colorClass =
+                HIGHLIGHT_COLORS.find((c) => c.value === ann.color)?.class ||
+                HIGHLIGHT_COLORS[0].class
               return (
                 <div
                   key={ann.id}
                   className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700"
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <div className={`inline-block px-2 py-1 rounded text-xs font-medium ${colorClass}`}>
+                    <div
+                      className={`inline-block px-2 py-1 rounded text-xs font-medium ${colorClass}`}
+                    >
                       {ann.selected_text || 'Highlight'}
                     </div>
                     <button
@@ -269,4 +284,3 @@ export default function PaperAnnotationEditor({ paper, annotations, onAnnotation
     </div>
   )
 }
-

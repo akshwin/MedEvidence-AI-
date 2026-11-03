@@ -1,7 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, Loader2, FileText, ExternalLink, TrendingUp, Sparkles, Download, BookmarkPlus } from 'lucide-react'
+import {
+  Search,
+  Loader2,
+  FileText,
+  ExternalLink,
+  TrendingUp,
+  Sparkles,
+  Download,
+  BookmarkPlus,
+} from 'lucide-react'
 import { searchPapers, Paper, dashboardApi } from '@/lib/api'
 import { formatAuthors, formatDate } from '@/lib/utils'
 import { downloadSearchResultsPDF } from '@/lib/pdf-utils'
@@ -32,14 +41,14 @@ export default function SearchBar() {
     try {
       const response = await searchPapers(query.trim(), 10, filters)
       setPapers(response.papers)
-      
+
       // Auto-save query if authenticated
       if (isAuthenticated && query.trim()) {
         try {
           await dashboardApi.saveQuery({
             query_text: query.trim(),
             query_type: 'search',
-            results_count: response.papers.length
+            results_count: response.papers.length,
           })
         } catch (saveError) {
           // Silently fail - saving is optional
@@ -71,13 +80,13 @@ export default function SearchBar() {
       showToast('Please login to save queries', 'info')
       return
     }
-    
+
     setSavingQuery(true)
     try {
       await dashboardApi.saveQuery({
         query_text: query.trim(),
         query_type: 'search',
-        results_count: papers.length
+        results_count: papers.length,
       })
       showToast('Query saved successfully!', 'success')
     } catch (error: any) {
@@ -90,16 +99,19 @@ export default function SearchBar() {
 
   const handleDownloadPDF = () => {
     if (papers.length > 0) {
-      const filename = `medevidence-search-${query.substring(0, 30).replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${Date.now()}.pdf`
+      const filename = `medevidence-search-${query
+        .substring(0, 30)
+        .replace(/[^a-z0-9]/gi, '-')
+        .toLowerCase()}-${Date.now()}.pdf`
       downloadSearchResultsPDF(query, papers, filename)
     }
   }
 
   const exampleQueries = [
-    "diabetes treatment",
-    "cancer immunotherapy",
-    "cardiovascular disease prevention",
-    "mental health interventions"
+    'diabetes treatment',
+    'cancer immunotherapy',
+    'cardiovascular disease prevention',
+    'mental health interventions',
   ]
 
   return (
@@ -116,7 +128,12 @@ export default function SearchBar() {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search medical literature... (e.g., 'diabetes treatment', 'cancer immunotherapy')"
             className={`w-full pl-14 pr-32 sm:pr-36 py-5 border-2 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 shadow-sm hover:shadow-md font-medium ${
-              (filters.year_from || filters.year_to || filters.journal || filters.study_type || filters.author || (filters.mesh_terms && filters.mesh_terms.length > 0))
+              filters.year_from ||
+              filters.year_to ||
+              filters.journal ||
+              filters.study_type ||
+              filters.author ||
+              (filters.mesh_terms && filters.mesh_terms.length > 0)
                 ? 'border-emerald-300 dark:border-emerald-600'
                 : 'border-gray-200 dark:border-gray-600'
             }`}
@@ -197,7 +214,9 @@ export default function SearchBar() {
             </div>
             <div>
               <div className="font-bold text-gray-900 dark:text-white">Try searching for:</div>
-              <div className="text-sm text-gray-600 dark:text-gray-300">Clinical research topics</div>
+              <div className="text-sm text-gray-600 dark:text-gray-300">
+                Clinical research topics
+              </div>
             </div>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -233,8 +252,12 @@ export default function SearchBar() {
             </div>
             <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full border-4 border-white shadow-lg animate-pulse" />
           </div>
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Searching medical literature...</h3>
-          <p className="text-gray-600 dark:text-gray-300">Finding peer-reviewed papers from clinical research databases</p>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+            Searching medical literature...
+          </h3>
+          <p className="text-gray-600 dark:text-gray-300">
+            Finding peer-reviewed papers from clinical research databases
+          </p>
         </div>
       )}
 
@@ -246,7 +269,8 @@ export default function SearchBar() {
           </div>
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">No papers found</h3>
           <p className="text-gray-600 dark:text-gray-300 text-center max-w-md mb-6">
-            Try adjusting your search terms or use different clinical keywords to find relevant medical papers.
+            Try adjusting your search terms or use different clinical keywords to find relevant
+            medical papers.
           </p>
           <button
             onClick={() => {
@@ -268,7 +292,11 @@ export default function SearchBar() {
             <div className="flex items-center space-x-3">
               <Sparkles className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
               <p className="text-sm font-bold text-gray-900 dark:text-white">
-                Found <span className="text-emerald-600 dark:text-emerald-400 text-lg">{papers.length}</span> paper{papers.length > 1 ? 's' : ''}
+                Found{' '}
+                <span className="text-emerald-600 dark:text-emerald-400 text-lg">
+                  {papers.length}
+                </span>{' '}
+                paper{papers.length > 1 ? 's' : ''}
               </p>
             </div>
             <div className="flex items-center space-x-4">
@@ -305,7 +333,9 @@ export default function SearchBar() {
                         </p>
                         <div className="flex flex-wrap items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                           <span className="flex items-center space-x-1">
-                            <span className="font-semibold text-gray-700 dark:text-gray-300">{formatAuthors(paper.authors)}</span>
+                            <span className="font-semibold text-gray-700 dark:text-gray-300">
+                              {formatAuthors(paper.authors)}
+                            </span>
                           </span>
                           {paper.year && (
                             <span className="flex items-center space-x-1">
@@ -324,9 +354,7 @@ export default function SearchBar() {
                     </div>
                   </div>
                   <div className="ml-6 flex-shrink-0 flex flex-col items-center space-y-2">
-                    {isAuthenticated && (
-                      <PaperActions paper={paper} />
-                    )}
+                    {isAuthenticated && <PaperActions paper={paper} />}
                     <a
                       href={`https://pubmed.ncbi.nlm.nih.gov/${paper.pmid}`}
                       target="_blank"

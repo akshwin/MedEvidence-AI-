@@ -6,6 +6,9 @@ import sentry_sdk
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from app.core.config import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def init_sentry():
@@ -22,9 +25,9 @@ def init_sentry():
             environment="development" if settings.debug else "production",
             enable_tracing=True,
         )
-        print("Sentry initialized successfully")
+        logger.info("Sentry initialized successfully")
     else:
-        print("Sentry DSN not configured, skipping initialization")
+        logger.info("Sentry DSN not configured, skipping initialization")
 
 
 def capture_exception(error: Exception, context: dict = None):
@@ -45,8 +48,3 @@ def capture_message(message: str, level: str = "info", context: dict = None):
                 for key, value in context.items():
                     scope.set_context(key, value)
             sentry_sdk.capture_message(message, level=level)
-
-
-
-
-

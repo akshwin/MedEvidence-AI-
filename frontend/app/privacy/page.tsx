@@ -19,7 +19,9 @@ export default function PrivacyPage() {
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-700 to-teal-700 dark:from-emerald-400 dark:to-teal-400 bg-clip-text text-transparent">
                   MedEvidence AI
                 </h1>
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Privacy Policy</p>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                  Privacy Policy
+                </p>
               </div>
             </Link>
             <div className="flex items-center space-x-4">
@@ -47,26 +49,43 @@ export default function PrivacyPage() {
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Privacy Policy</h1>
           </div>
 
-          <p className="text-gray-600 dark:text-gray-400 mb-8">Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          <p className="text-gray-600 dark:text-gray-400 mb-8">
+            Last updated:{' '}
+            {new Date().toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </p>
 
           <div className="prose prose-emerald dark:prose-invert max-w-none space-y-8">
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">1. Introduction</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                1. Introduction
+              </h2>
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                MedEvidence AI ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our medical research platform.
+                MedEvidence AI ("we," "our," or "us") is committed to protecting your privacy. This
+                Privacy Policy explains how we collect, use, disclose, and safeguard your
+                information when you use our medical research platform.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">2. Information We Collect</h2>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">2.1 Information You Provide</h3>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                2. Information We Collect
+              </h2>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                2.1 Information You Provide
+              </h3>
               <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
                 <li>Account information (name, email address)</li>
                 <li>Research queries and search history</li>
                 <li>Communication data when you contact us</li>
               </ul>
 
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 mt-6">2.2 Automatically Collected Information</h3>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 mt-6">
+                2.2 Automatically Collected Information
+              </h3>
               <ul className="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-300">
                 <li>Usage data and analytics</li>
                 <li>Device information</li>
@@ -75,7 +94,9 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">3. How We Use Your Information</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                3. How We Use Your Information
+              </h2>
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-4">
                 We use the information we collect to:
               </p>
@@ -89,14 +110,20 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">4. Data Security</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                4. Data Security
+              </h2>
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                We implement appropriate technical and organizational measures to protect your personal information. However, no method of transmission over the Internet is 100% secure, and we cannot guarantee absolute security.
+                We implement appropriate technical and organizational measures to protect your
+                personal information. However, no method of transmission over the Internet is 100%
+                secure, and we cannot guarantee absolute security.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">5. Your Rights</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                5. Your Rights
+              </h2>
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-4">
                 You have the right to:
               </p>
@@ -110,10 +137,15 @@ export default function PrivacyPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">6. Contact Us</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                6. Contact Us
+              </h2>
               <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                 If you have questions about this Privacy Policy, please contact us at{' '}
-                <a href="mailto:privacy@medevidence.ai" className="text-emerald-600 dark:text-emerald-400 hover:underline">
+                <a
+                  href="mailto:privacy@medevidence.ai"
+                  className="text-emerald-600 dark:text-emerald-400 hover:underline"
+                >
                   privacy@medevidence.ai
                 </a>
               </p>
@@ -124,4 +156,3 @@ export default function PrivacyPage() {
     </div>
   )
 }
-
