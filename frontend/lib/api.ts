@@ -396,18 +396,6 @@ export interface PaperNote {
   updated_at: string
 }
 
-export interface Alert {
-  id: string
-  name: string
-  query: string
-  is_active: boolean
-  frequency: string
-  last_checked: string | null
-  created_at: string
-  updated_at: string
-  filters?: any
-}
-
 export interface Activity {
   id: string
   activity_type: string
@@ -422,7 +410,6 @@ export interface DashboardStats {
   total_reading_lists: number
   total_notes: number
   total_saved_queries: number
-  total_alerts: number
   recent_activity_count: number
   conversations_this_week: number
   messages_this_week: number
@@ -573,31 +560,6 @@ export const dashboardApi = {
 
   deleteNote: async (id: string): Promise<void> => {
     await api.delete(`/api/dashboard/notes/${id}`)
-  },
-
-  // Alerts
-  createAlert: async (data: {
-    name: string
-    query: string
-    frequency?: string
-    filters?: any
-  }): Promise<Alert> => {
-    const response = await api.post<Alert>('/api/dashboard/alerts', data)
-    return response.data
-  },
-
-  listAlerts: async (params?: { is_active?: boolean }): Promise<Alert[]> => {
-    const response = await api.get<Alert[]>('/api/dashboard/alerts', { params })
-    return response.data
-  },
-
-  toggleAlert: async (id: string): Promise<Alert> => {
-    const response = await api.put<Alert>(`/api/dashboard/alerts/${id}/toggle`)
-    return response.data
-  },
-
-  deleteAlert: async (id: string): Promise<void> => {
-    await api.delete(`/api/dashboard/alerts/${id}`)
   },
 
   // Activity

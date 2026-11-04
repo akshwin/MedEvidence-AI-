@@ -28,7 +28,6 @@ import {
   History,
   Bookmark,
   FileText,
-  Bell,
   TrendingUp,
   Clock,
   ExternalLink,
@@ -305,7 +304,7 @@ export default function Home() {
           ) : null}
 
           {/* Recent Activity & Quick Links */}
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 gap-6">
             {/* Recent Conversations */}
             <Link
               href="/conversations"
@@ -343,26 +342,6 @@ export default function Home() {
               </p>
               <p className="text-teal-600 dark:text-teal-400 text-sm font-medium">
                 Manage queries →
-              </p>
-            </Link>
-
-            {/* Alerts */}
-            <Link
-              href="/dashboard?tab=alerts"
-              className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all group"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center space-x-2">
-                  <Bell className="w-5 h-5 text-purple-600" />
-                  <span>Alerts</span>
-                </h3>
-                <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors" />
-              </div>
-              <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
-                {stats?.total_alerts || 0} active alerts
-              </p>
-              <p className="text-purple-600 dark:text-purple-400 text-sm font-medium">
-                Manage alerts →
               </p>
             </Link>
           </div>

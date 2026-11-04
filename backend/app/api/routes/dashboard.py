@@ -1,5 +1,5 @@
 """
-Dashboard routes: user dashboard features including saved queries, bookmarks, reading lists, notes, alerts, activity, and statistics
+Dashboard routes: user dashboard features including saved queries, bookmarks, reading lists, notes, activity, and statistics
 """
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
@@ -19,7 +19,6 @@ from app.models.dashboard import (
     ReadingList,
     ReadingListPaper,
     PaperNote,
-    Alert,
     UserActivity,
     ApiUsage,
     PerformanceMetric,
@@ -131,28 +130,6 @@ class PaperNoteResponse(BaseModel):
         from_attributes = True
 
 
-class AlertCreate(BaseModel):
-    name: str
-    query: str
-    frequency: str = "daily"  # 'daily', 'weekly', 'monthly'
-    filters: Optional[dict] = None
-
-
-class AlertResponse(BaseModel):
-    id: str
-    name: str
-    query: str
-    is_active: bool
-    frequency: str
-    last_checked: Optional[datetime]
-    created_at: datetime
-    updated_at: datetime
-    filters: Optional[dict] = None
-
-    class Config:
-        from_attributes = True
-
-
 class ActivityResponse(BaseModel):
     id: str
     activity_type: str
@@ -170,7 +147,6 @@ class DashboardStatsResponse(BaseModel):
     total_reading_lists: int
     total_notes: int
     total_saved_queries: int
-    total_alerts: int
     recent_activity_count: int
     conversations_this_week: int
     messages_this_week: int
@@ -776,125 +752,6 @@ async def delete_note(
     return None
 
 
-# ==================== Alerts ====================
-
-
-@router.post("/alerts", response_model=AlertResponse, status_code=status.HTTP_201_CREATED)
-async def create_alert(
-    alert_data: AlertCreate,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    """Create an alert for new papers"""
-    filters_json = json.dumps(alert_data.filters) if alert_data.filters else None
-
-    alert = Alert(
-        user_id=current_user.id,
-        name=alert_data.name,
-        query=alert_data.query,
-        frequency=alert_data.frequency,
-        filters_json=filters_json,
-    )
-
-    db.add(alert)
-    db.commit()
-    db.refresh(alert)
-
-    return AlertResponse(
-        id=alert.id,
-        name=alert.name,
-        query=alert.query,
-        is_active=alert.is_active,
-        frequency=alert.frequency,
-        last_checked=alert.last_checked,
-        created_at=alert.created_at,
-        updated_at=alert.updated_at,
-        filters=json.loads(alert.filters_json) if alert.filters_json else None,
-    )
-
-
-@router.get("/alerts", response_model=List[AlertResponse])
-async def list_alerts(
-    is_active: Optional[bool] = Query(None, description="Filter by active status"),
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    """List alerts"""
-    query = db.query(Alert).filter(Alert.user_id == current_user.id)
-
-    if is_active is not None:
-        query = query.filter(Alert.is_active == is_active)
-
-    alerts = query.order_by(desc(Alert.created_at)).all()
-
-    result = []
-    for a in alerts:
-        result.append(
-            AlertResponse(
-                id=a.id,
-                name=a.name,
-                query=a.query,
-                is_active=a.is_active,
-                frequency=a.frequency,
-                last_checked=a.last_checked,
-                created_at=a.created_at,
-                updated_at=a.updated_at,
-                filters=json.loads(a.filters_json) if a.filters_json else None,
-            )
-        )
-
-    return result
-
-
-@router.put("/alerts/{alert_id}/toggle", response_model=AlertResponse)
-async def toggle_alert(
-    alert_id: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
-):
-    """Toggle alert active status"""
-    alert = (
-        db.query(Alert).filter(and_(Alert.id == alert_id, Alert.user_id == current_user.id)).first()
-    )
-
-    if not alert:
-        raise HTTPException(status_code=404, detail="Alert not found")
-
-    alert.is_active = not alert.is_active
-    alert.updated_at = datetime.utcnow()
-
-    db.commit()
-    db.refresh(alert)
-
-    return AlertResponse(
-        id=alert.id,
-        name=alert.name,
-        query=alert.query,
-        is_active=alert.is_active,
-        frequency=alert.frequency,
-        last_checked=alert.last_checked,
-        created_at=alert.created_at,
-        updated_at=alert.updated_at,
-        filters=json.loads(alert.filters_json) if alert.filters_json else None,
-    )
-
-
-@router.delete("/alerts/{alert_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_alert(
-    alert_id: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
-):
-    """Delete an alert"""
-    alert = (
-        db.query(Alert).filter(and_(Alert.id == alert_id, Alert.user_id == current_user.id)).first()
-    )
-
-    if not alert:
-        raise HTTPException(status_code=404, detail="Alert not found")
-
-    db.delete(alert)
-    db.commit()
-
-    return None
-
-
 # ==================== Activity Feed ====================
 
 
@@ -958,8 +815,6 @@ async def get_dashboard_stats(
 
     total_saved_queries = db.query(SavedQuery).filter(SavedQuery.user_id == current_user.id).count()
 
-    total_alerts = db.query(Alert).filter(Alert.user_id == current_user.id).count()
-
     # Recent activity (last 7 days)
     recent_activity_count = (
         db.query(UserActivity)
@@ -988,7 +843,6 @@ async def get_dashboard_stats(
         total_reading_lists=total_reading_lists,
         total_notes=total_notes,
         total_saved_queries=total_saved_queries,
-        total_alerts=total_alerts,
         recent_activity_count=recent_activity_count,
         conversations_this_week=conversations_this_week,
         messages_this_week=messages_this_week,

@@ -7,7 +7,6 @@ import {
   Bookmark,
   BookOpen,
   FileText,
-  Bell,
   History,
   Search,
   Plus,
@@ -42,7 +41,6 @@ import {
   type Bookmark as BookmarkType,
   type ReadingList,
   type PaperNote,
-  type Alert,
   type Activity as ActivityType,
   type PaperAnnotation,
 } from '@/lib/api'
@@ -54,7 +52,6 @@ type TabType =
   | 'bookmarks'
   | 'lists'
   | 'notes'
-  | 'alerts'
   | 'activity'
   | 'analytics'
   | 'annotations'
@@ -91,13 +88,6 @@ export default function DashboardContent() {
   // Annotations
   const [annotations, setAnnotations] = useState<PaperAnnotation[]>([])
 
-  // Alerts
-  const [alerts, setAlerts] = useState<Alert[]>([])
-  const [showCreateAlertModal, setShowCreateAlertModal] = useState(false)
-  const [newAlertName, setNewAlertName] = useState('')
-  const [newAlertQuery, setNewAlertQuery] = useState('')
-  const [newAlertFrequency, setNewAlertFrequency] = useState('daily')
-
   // Activity
   const [activities, setActivities] = useState<ActivityType[]>([])
 
@@ -122,10 +112,6 @@ export default function DashboardContent() {
     isOpen: boolean
     id: string | null
   }>({ isOpen: false, id: null })
-  const [deleteAlertDialog, setDeleteAlertDialog] = useState<{
-    isOpen: boolean
-    id: string | null
-  }>({ isOpen: false, id: null })
 
   useEffect(() => {
     // Wait for auth to finish loading
@@ -143,7 +129,6 @@ export default function DashboardContent() {
         'bookmarks',
         'lists',
         'notes',
-        'alerts',
         'activity',
         'analytics',
         'annotations',
@@ -186,9 +171,6 @@ export default function DashboardContent() {
       } else if (activeTab === 'annotations') {
         const annotationsData = await dashboardApi.listAnnotations()
         setAnnotations(annotationsData)
-      } else if (activeTab === 'alerts') {
-        const alertsData = await dashboardApi.listAlerts()
-        setAlerts(alertsData)
       } else if (activeTab === 'activity') {
         const activityData = await dashboardApi.getActivity({ limit: 50 })
         setActivities(activityData)
@@ -380,58 +362,6 @@ export default function DashboardContent() {
     setDeleteAnnotationDialog({ isOpen: false, id: null })
   }
 
-  const handleCreateAlert = async () => {
-    if (!newAlertName.trim() || !newAlertQuery.trim()) {
-      showToast('Please enter alert name and query', 'error')
-      return
-    }
-    try {
-      await dashboardApi.createAlert({
-        name: newAlertName,
-        query: newAlertQuery,
-        frequency: newAlertFrequency,
-      })
-      showToast('Alert created', 'success')
-      setNewAlertName('')
-      setNewAlertQuery('')
-      setNewAlertFrequency('daily')
-      setShowCreateAlertModal(false)
-      loadDashboardData()
-    } catch (error: any) {
-      showToast('Failed to create alert', 'error')
-    }
-  }
-
-  const handleToggleAlert = async (id: string) => {
-    try {
-      await dashboardApi.toggleAlert(id)
-      loadDashboardData()
-    } catch (error: any) {
-      showToast('Failed to toggle alert', 'error')
-    }
-  }
-
-  const handleDeleteAlertClick = (id: string) => {
-    setDeleteAlertDialog({ isOpen: true, id })
-  }
-
-  const handleDeleteAlertConfirm = async () => {
-    if (!deleteAlertDialog.id) return
-    try {
-      await dashboardApi.deleteAlert(deleteAlertDialog.id)
-      showToast('Alert deleted', 'success')
-      setDeleteAlertDialog({ isOpen: false, id: null })
-      loadDashboardData()
-    } catch (error: any) {
-      showToast('Failed to delete alert', 'error')
-      setDeleteAlertDialog({ isOpen: false, id: null })
-    }
-  }
-
-  const handleDeleteAlertCancel = () => {
-    setDeleteAlertDialog({ isOpen: false, id: null })
-  }
-
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
@@ -535,14 +465,10 @@ export default function DashboardContent() {
                       ],
                     },
                     {
-                      title: 'Monitoring',
-                      icon: Bell,
-                      id: 'alerts' as TabType,
-                      description: 'Alerts & activity',
-                      children: [
-                        { id: 'alerts' as TabType, label: 'Alerts', icon: Bell },
-                        { id: 'activity' as TabType, label: 'Activity', icon: History },
-                      ],
+                      title: 'Activity',
+                      icon: History,
+                      id: 'activity' as TabType,
+                      description: 'Recent activity',
                     },
                     {
                       title: 'Analytics',
@@ -1150,85 +1076,6 @@ export default function DashboardContent() {
                     </div>
                   )}
 
-                  {/* Alerts Tab */}
-                  {activeTab === 'alerts' && (
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center mb-4">
-                        <div>
-                          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                            Alerts
-                          </h2>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                            Get notified about new papers matching your criteria
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => setShowCreateAlertModal(true)}
-                          className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center space-x-2"
-                        >
-                          <Plus className="w-4 h-4" />
-                          <span>Create Alert</span>
-                        </button>
-                      </div>
-                      {alerts.length === 0 ? (
-                        <div className="bg-white dark:bg-gray-800 rounded-xl p-12 text-center border border-gray-100 dark:border-gray-700">
-                          <Bell className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                          <p className="text-gray-600 dark:text-gray-400">No alerts yet</p>
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          {alerts.map((alert) => (
-                            <div
-                              key={alert.id}
-                              className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700"
-                            >
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                  <div className="flex items-center space-x-2 mb-2">
-                                    <h3 className="font-semibold text-gray-900 dark:text-white">
-                                      {alert.name}
-                                    </h3>
-                                    <span
-                                      className={`px-2 py-1 text-xs rounded ${alert.is_active ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'}`}
-                                    >
-                                      {alert.is_active ? 'Active' : 'Inactive'}
-                                    </span>
-                                  </div>
-                                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                    Query: {alert.query}
-                                  </p>
-                                  <div className="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400 mt-2">
-                                    <span>Frequency: {alert.frequency}</span>
-                                    {alert.last_checked && (
-                                      <span>Last checked: {formatDate(alert.last_checked)}</span>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <button
-                                    onClick={() => handleToggleAlert(alert.id)}
-                                    className="p-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-                                    title={alert.is_active ? 'Deactivate' : 'Activate'}
-                                  >
-                                    <Bell
-                                      className={`w-4 h-4 ${alert.is_active ? 'text-emerald-600' : 'text-gray-400'}`}
-                                    />
-                                  </button>
-                                  <button
-                                    onClick={() => handleDeleteAlertClick(alert.id)}
-                                    className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
                   {/* Analytics Tab */}
                   {activeTab === 'analytics' && <UsageAnalytics />}
 
@@ -1395,77 +1242,6 @@ export default function DashboardContent() {
         </div>
       )}
 
-      {/* Create Alert Modal */}
-      {showCreateAlertModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Create Alert</h3>
-              <button
-                onClick={() => setShowCreateAlertModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Alert Name *
-                </label>
-                <input
-                  type="text"
-                  value={newAlertName}
-                  onChange={(e) => setNewAlertName(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="e.g., New COVID-19 Research"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Search Query *
-                </label>
-                <textarea
-                  value={newAlertQuery}
-                  onChange={(e) => setNewAlertQuery(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  rows={3}
-                  placeholder="Enter search query..."
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Frequency
-                </label>
-                <select
-                  value={newAlertFrequency}
-                  onChange={(e) => setNewAlertFrequency(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  <option value="daily">Daily</option>
-                  <option value="weekly">Weekly</option>
-                  <option value="monthly">Monthly</option>
-                </select>
-              </div>
-              <div className="flex space-x-3">
-                <button
-                  onClick={handleCreateAlert}
-                  className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-                >
-                  Create
-                </button>
-                <button
-                  onClick={() => setShowCreateAlertModal(false)}
-                  className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Delete Confirmation Dialogs */}
       <ConfirmDialog
         isOpen={deleteQueryDialog.isOpen}
@@ -1508,17 +1284,6 @@ export default function DashboardContent() {
         cancelText="Cancel"
         onConfirm={handleDeleteNoteConfirm}
         onCancel={handleDeleteNoteCancel}
-        type="danger"
-      />
-
-      <ConfirmDialog
-        isOpen={deleteAlertDialog.isOpen}
-        title="Delete Alert"
-        message="Are you sure you want to delete this alert? You will no longer receive notifications for this query."
-        confirmText="Delete"
-        cancelText="Cancel"
-        onConfirm={handleDeleteAlertConfirm}
-        onCancel={handleDeleteAlertCancel}
         type="danger"
       />
 

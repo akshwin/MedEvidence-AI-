@@ -1,5 +1,5 @@
 """
-Dashboard database models for user activity, saved queries, bookmarks, reading lists, notes, and alerts
+Dashboard database models for user activity, saved queries, bookmarks, reading lists, and notes
 """
 
 from sqlalchemy import Column, String, Text, DateTime, ForeignKey, Integer, Boolean, JSON
@@ -110,28 +110,6 @@ class PaperNote(Base):
 
     def __repr__(self):
         return f"<PaperNote(id={self.id}, user_id={self.user_id}, paper_id={self.paper_id})>"
-
-
-class Alert(Base):
-    """Custom alerts for new papers matching criteria"""
-
-    __tablename__ = "alerts"
-
-    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)
-    name = Column(String, nullable=False)  # Alert name
-    query = Column(Text, nullable=False)  # Search query for alert
-    is_active = Column(Boolean, default=True, index=True)
-    frequency = Column(String, default="daily")  # 'daily', 'weekly', 'monthly'
-    last_checked = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    # Additional filters as JSON
-    filters_json = Column(Text, nullable=True)  # JSON string of filters (year range, journal, etc.)
-
-    def __repr__(self):
-        return f"<Alert(id={self.id}, user_id={self.user_id}, name={self.name})>"
 
 
 class UserActivity(Base):
